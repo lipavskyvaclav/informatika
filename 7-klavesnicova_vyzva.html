@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klávesnicový trénink: Operace Heslo</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #1e293b;
+            color: #1a1a1a;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: #ffffff;
+            border: 4px solid #38bdf8;
+            box-shadow: 10px 10px 0px #0ea5e9;
+            border-radius: 16px;
+            padding: 30px;
+            margin-top: 20px;
+        }
+        h1 {
+            font-family: 'Impact', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #ffffff;
+            font-size: 2.8rem;
+            text-align: center;
+            margin-top: 0;
+            background: #0ea5e9;
+            padding: 15px;
+            border: 3px solid #0284c7;
+            transform: rotate(-1deg);
+            border-radius: 8px;
+        }
+        .intro {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            background: #f0f9ff;
+            padding: 20px;
+            border-left: 6px solid #0ea5e9;
+            border-radius: 4px;
+        }
+        .task-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .task-card {
+            background: #f8fafc;
+            border: 3px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .task-card.success {
+            background: #dcfce7;
+            border-color: #22c55e;
+        }
+        .target-sentence {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #0f172a;
+            background: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            user-select: none; /* Zabrani kopirovani */
+            -webkit-user-select: none;
+            pointer-events: none;
+        }
+        .input-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 3px solid #64748b;
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        input[type="text"]:focus {
+            border-color: #0ea5e9;
+            box-shadow: 4px 4px 0px #0ea5e9;
+        }
+        input.correct {
+            background-color: #bbf7d0;
+            border-color: #16a34a;
+        }
+        .btn-hint {
+            background: #f59e0b;
+            color: white;
+            border: 3px solid #b45309;
+            padding: 15px 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            box-shadow: 3px 3px 0px #b45309;
+            transition: all 0.1s;
+            flex-shrink: 0;
+        }
+        .btn-hint:active {
+            transform: translate(3px, 3px);
+            box-shadow: 0px 0px 0px #b45309;
+        }
+        .status-icon {
+            font-size: 2rem;
+            width: 40px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        /* Modal pro napovedu */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.2s;
+        }
+        .modal-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border: 4px solid #000;
+            box-shadow: 8px 8px 0px #000;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+        }
+        .modal-content h2 {
+            margin-top: 0;
+            color: #0ea5e9;
+            text-align: center;
+        }
+        .hint-list {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin: 20px 0;
+        }
+        .key-badge {
+            background: #1e293b;
+            color: #38bdf8;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-weight: bold;
+        }
+        .modal-close {
+            display: block;
+            width: 100%;
+            background: #0ea5e9;
+            color: white;
+            border: 3px solid #0284c7;
+            padding: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .modal-close:hover {
+            background: #0284c7;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🔐 Operace Heslo</h1>
+        
+        <div class="intro">
+            <strong>Agenti, zbystřete!</strong> Trénink přesného psaní začíná. 
+            Tvým úkolem je opsat zachycené zprávy přesně tak, jak je vidíš (včetně mezer a velikosti písmen). 
+            Pokud si nevíš rady s nějakým speciálním znakem, klikni na oranžové tlačítko <strong>❓ Nápověda</strong>.
+        </div>
+
+        <div class="task-container">
+            <!-- Veta 1 -->
+            <div class="task-card" id="card-1">
+                <div class="target-sentence" id="target-1">Taťána dostala poukázku do H&M za 25€.</div>
+                <div class="input-row">
+                    <input type="text" id="input-1" placeholder="Opiš zprávu sem..." oninput="checkInput(1)" autocomplete="off" spellcheck="false">
+                    <button class="btn-hint" onclick="showHint(1)">❓ Nápověda</button>
+                    <div class="status-icon" id="status-1">⬜</div>
+                </div>
+            </div>
+
+            <!-- Veta 2 -->
+            <div class="task-card" id="card-2">
+                <div class="target-sentence" id="target-2">Pastrňák s číslem #88 dal pětistý gól a získal bonus $100000!</div>
+                <div class="input-row">
+                    <input type="text" id="input-2" placeholder="Opiš zprávu sem..." oninput="checkInput(2)" autocomplete="off" spellcheck="false">
+                    <button class="btn-hint" onclick="showHint(2)">❓ Nápověda</button>
+                    <div class="status-icon" id="status-2">⬜</div>
+                </div>
+            </div>
+
+            <!-- Veta 3 -->
+            <div class="task-card" id="card-3">
+                <div class="target-sentence" id="target-3">Vytočte *33 a potvrďte # anebo napište na podpora@firma.cz.</div>
+                <div class="input-row">
+                    <input type="text" id="input-3" placeholder="Opiš zprávu sem..." oninput="checkInput(3)" autocomplete="off" spellcheck="false">
+                    <button class="btn-hint" onclick="showHint(3)">❓ Nápověda</button>
+                    <div class="status-icon" id="status-3">⬜</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pro napovedu -->
+    <div class="modal-overlay" id="hintModal">
+        <div class="modal-content">
+            <h2>💡 Klávesnicový tahák</h2>
+            <div id="hintText" class="hint-list"></div>
+            <button class="modal-close" onclick="closeHint()">Zavřít nápovědu</button>
+        </div>
+    </div>
+
+    <script>
+        const hints = {
+            1: `
+                <strong>&</strong> (ampersand) = <span class="key-badge">Pravý Alt + C</span><br>
+                <strong>€</strong> (euro) = <span class="key-badge">Pravý Alt + E</span>
+            `,
+            2: `
+                <strong>#</strong> (mřížka) = <span class="key-badge">Pravý Alt + X</span><br>
+                <strong>$</strong> (dolar) = <span class="key-badge">Pravý Alt + Ů</span><br>
+                <strong>!</strong> (vykřičník) = <span class="key-badge">Shift + §</span>
+            `,
+            3: `
+                <strong>*</strong> (hvězdička) = <span class="key-badge">Pravý Alt + pomlčka (-)</span><br>
+                <strong>#</strong> (mřížka) = <span class="key-badge">Pravý Alt + X</span><br>
+                <strong>@</strong> (zavináč) = <span class="key-badge">Pravý Alt + V</span>
+            `
+        };
+
+        function showHint(id) {
+            document.getElementById('hintText').innerHTML = hints[id];
+            document.getElementById('hintModal').classList.add('active');
+        }
+
+        function closeHint() {
+            document.getElementById('hintModal').classList.remove('active');
+        }
+
+        document.getElementById('hintModal').addEventListener('click', function(e) {
+            if (e.target === this) closeHint();
+        });
+
+        function checkInput(id) {
+            const targetText = document.getElementById(`target-${id}`).innerText;
+            const inputField = document.getElementById(`input-${id}`);
+            const statusIcon = document.getElementById(`status-${id}`);
+            const card = document.getElementById(`card-${id}`);
+
+            if (inputField.value === targetText) {
+                inputField.classList.add('correct');
+                card.classList.add('success');
+                statusIcon.innerHTML = "✅";
+            } else {
+                inputField.classList.remove('correct');
+                card.classList.remove('success');
+                if (inputField.value.length > 0) {
+                    statusIcon.innerHTML = "⏳";
+                } else {
+                    statusIcon.innerHTML = "⬜";
+                }
+            }
+        }
+    </script>
+</body>
+</html>
