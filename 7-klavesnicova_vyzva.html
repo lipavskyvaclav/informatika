@@ -328,10 +328,10 @@
         });
 
         function checkInput(id) {
-            const targetText = document.getElementById(\`target-\${id}\`).innerText;
-            const inputField = document.getElementById(\`input-\${id}\`);
-            const statusIcon = document.getElementById(\`status-\${id}\`);
-            const card = document.getElementById(\`card-\${id}\`);
+            const targetText = document.getElementById(`target-${id}`).innerText;
+            const inputField = document.getElementById(`input-${id}`);
+            const statusIcon = document.getElementById(`status-${id}`);
+            const card = document.getElementById(`card-${id}`);
 
             if (inputField.value === targetText) {
                 inputField.classList.add('correct');
