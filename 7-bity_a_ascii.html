@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tajný jazyk počítačů: Bity a ASCII</title>
+<style>
+  :root{
+    --bg1:#0f0c29;
+    --bg2:#302b63;
+    --bg3:#24243e;
+    --neon:#00e5ff;
+    --neon2:#ff2e88;
+    --yellow:#ffd93d;
+    --green:#4ade80;
+    --card:#ffffff;
+    --text:#1e1e2e;
+    --purple:#7c5cff;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Trebuchet MS','Segoe UI',sans-serif;
+    background:
+      linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 55%,var(--bg3) 100%);
+    color:var(--text);
+    padding:24px 12px 70px;
+    position:relative;
+    overflow-x:hidden;
+  }
+  .binary-rain{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    opacity:.10;
+    pointer-events:none;
+    font-family:monospace;
+    font-size:14px;
+    color:var(--neon);
+    line-height:1.2;
+    overflow:hidden;
+    user-select:none;
+  }
+  .wrap{max-width:920px;margin:0 auto;position:relative;z-index:1;}
+
+  header{
+    text-align:center;
+    color:white;
+    margin-bottom:28px;
+    padding:10px 10px 0;
+  }
+  header .robot{font-size:3em;display:block;margin-bottom:6px;}
+  header h1{
+    font-size:2em;
+    margin:0 0 10px;
+    background:linear-gradient(90deg,var(--neon),var(--neon2));
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    text-shadow:0 0 30px rgba(0,229,255,0.3);
+  }
+  header p{
+    max-width:650px;
+    margin:0 auto;
+    opacity:.9;
+    line-height:1.6;
+    font-size:1.05em;
+  }
+
+  .card{
+    background:var(--card);
+    border-radius:20px;
+    padding:26px 28px;
+    margin-bottom:22px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.35);
+  }
+  .card h2{
+    margin-top:0;
+    font-size:1.4em;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:var(--bg2);
+  }
+  .tag{
+    display:inline-block;
+    background:var(--yellow);
+    color:#5b4a00;
+    font-weight:700;
+    font-size:.6em;
+    padding:3px 10px;
+    border-radius:20px;
+    vertical-align:middle;
+  }
+
+  .analogy{
+    display:flex;
+    gap:18px;
+    flex-wrap:wrap;
+    align-items:center;
+    margin:16px 0;
+    background:#f4f1ff;
+    border-radius:14px;
+    padding:16px 20px;
+  }
+  .switch-demo{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+  }
+  .switch{
+    width:70px;height:36px;
+    background:#ccc;
+    border-radius:20px;
+    position:relative;
+    cursor:pointer;
+    transition:background .2s;
+  }
+  .switch.on{background:var(--green);}
+  .switch::after{
+    content:'';
+    position:absolute;
+    top:3px;left:3px;
+    width:30px;height:30px;
+    background:white;
+    border-radius:50%;
+    transition:left .2s;
+    box-shadow:0 2px 6px rgba(0,0,0,0.3);
+  }
+  .switch.on::after{left:37px;}
+  .switch-label{font-weight:700;font-size:1.3em;color:var(--bg2);}
+  .analogy-text{flex:1;min-width:220px;line-height:1.6;}
+
+  /* bits slider */
+  .slider-box{
+    background:#f4f1ff;
+    border-radius:14px;
+    padding:20px 22px;
+    margin:16px 0;
+    text-align:center;
+  }
+  input[type=range]{
+    width:100%;
+    accent-color:var(--purple);
+    height:6px;
+    margin:14px 0;
+  }
+  .slider-readout{
+    display:flex;
+    justify-content:center;
+    gap:30px;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+  .readout-box{
+    background:white;
+    border-radius:12px;
+    padding:12px 20px;
+    box-shadow:0 4px 14px rgba(0,0,0,0.08);
+    min-width:130px;
+  }
+  .readout-box .num{
+    font-size:1.8em;
+    font-weight:800;
+    color:var(--purple);
+  }
+  .readout-box .lbl{font-size:.85em;color:#666;}
+
+  table.bit-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+    font-size:.98em;
+  }
+  table.bit-table th{
+    background:var(--bg2);
+    color:white;
+    padding:10px;
+    text-align:center;
+  }
+  table.bit-table td{
+    text-align:center;
+    padding:9px;
+    border-bottom:1px solid #eee;
+  }
+  table.bit-table tr:nth-child(even){background:#f8f7ff;}
+  table.bit-table tr.highlight-7{background:#fff3cd !important;font-weight:700;}
+  table.bit-table tr.highlight-8{background:#d4f7e0 !important;font-weight:700;}
+
+  .explain-box{
+    background:#fff8e1;
+    border-left:4px solid var(--yellow);
+    padding:14px 18px;
+    border-radius:8px;
+    line-height:1.6;
+    margin:14px 0;
+    font-size:.98em;
+  }
+  .explain-box.green{background:#eafff2;border-left-color:var(--green);}
+
+  /* converter */
+  .converter-input{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin:16px 0;
+  }
+  .converter-input input{
+    flex:1;
+    min-width:200px;
+    padding:14px 16px;
+    border:3px solid var(--purple);
+    border-radius:12px;
+    font-size:1.15em;
+    font-family:inherit;
+  }
+  .converter-input input:focus{outline:none;border-color:var(--neon2);}
+  .go-btn{
+    background:linear-gradient(135deg,var(--purple),var(--neon2));
+    color:white;
+    border:none;
+    padding:14px 26px;
+    border-radius:12px;
+    font-size:1.1em;
+    font-weight:800;
+    cursor:pointer;
+    box-shadow:0 6px 16px rgba(124,92,255,0.4);
+  }
+  .go-btn:hover{filter:brightness(1.08);}
+
+  #modeNote{
+    display:none;
+    padding:14px 18px;
+    border-radius:10px;
+    margin-bottom:16px;
+    line-height:1.6;
+    font-weight:600;
+  }
+  #modeNote.mode7{display:block;background:#fff3cd;color:#5b4a00;border-left:4px solid var(--yellow);}
+  #modeNote.mode8{display:block;background:#ffe0ec;color:#7a1240;border-left:4px solid var(--neon2);}
+
+  .binary-output{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-top:6px;
+  }
+  .letter-block{
+    background:#1e1e2e;
+    border-radius:12px;
+    padding:12px 14px;
+    text-align:center;
+    min-width:80px;
+    box-shadow:0 6px 14px rgba(0,0,0,0.2);
+  }
+  .letter-block .char{
+    font-size:1.5em;
+    font-weight:800;
+    color:var(--yellow);
+    margin-bottom:4px;
+  }
+  .letter-block .bits{
+    font-family:'Consolas','Courier New',monospace;
+    font-size:1.05em;
+    color:var(--neon);
+    letter-spacing:1px;
+  }
+  .letter-block .dec{
+    font-size:.75em;
+    color:#aaa;
+    margin-top:4px;
+  }
+  .letter-block.ext .bits{color:var(--neon2);}
+  .letter-block.ext{border:2px solid var(--neon2);}
+
+  footer{
+    text-align:center;
+    color:white;
+    opacity:.8;
+    font-size:.9em;
+    margin-top:10px;
+  }
+
+  @media(max-width:600px){
+    header h1{font-size:1.5em;}
+    .card{padding:20px 18px;}
+  }
+</style>
+</head>
+<body>
+<div class="binary-rain" id="binaryRain"></div>
+<div class="wrap">
+
+  <header>
+    <span class="robot">🤖</span>
+    <h1>Tajný jazyk počítačů: Bity a ASCII</h1>
+    <p>Počítač je vlastně dost hloupý – rozumí jen dvěma věcem: <b>ANO</b> a <b>NE</b>. A přesto na něm píšeš zprávy, hraješ hry a díváš se na videa. Jak je to možné? Pojď na to přijít!</p>
+  </header>
+
+  <!-- CO JE BIT -->
+  <div class="card">
+    <h2>💡 Co je to bit?</h2>
+    <div class="analogy">
+      <div class="switch-demo">
+        <div class="switch" id="demoSwitch" onclick="toggleSwitch()"></div>
+        <div class="switch-label" id="switchLabel">0</div>
+      </div>
+      <div class="analogy-text">
+        Klikni na vypínač! Vidíš – buď svítí (<b>1</b>), nebo nesvítí (<b>0</b>). Přesně takhle přemýšlí počítač. Jedna takováhle „ANO/NE" volba se nazývá <b>bit</b> – je to nejmenší kousek informace, jaký počítač zná. Nic mezi tím neexistuje, žádné „napůl".
+      </div>
+    </div>
+    <div class="explain-box">
+      Jeden bit sám o sobě moc informací neponese – rozliší jen dvě možnosti (0 nebo 1). Ale co když jich dáme víc vedle sebe? Podívej se níž! 👇
+    </div>
+  </div>
+
+  <!-- SLIDER -->
+  <div class="card">
+    <h2>🎚️ Kolik znaků zvládneš zakódovat?</h2>
+    <div class="slider-box">
+      <p>Posouvej jezdcem a sleduj, jak rychle roste počet možných kombinací, když přidáváš bity:</p>
+      <input type="range" id="bitSlider" min="1" max="8" value="1" oninput="updateSlider()">
+      <div class="slider-readout">
+        <div class="readout-box">
+          <div class="num" id="sliderBits">1</div>
+          <div class="lbl">počet bitů</div>
+        </div>
+        <div class="readout-box">
+          <div class="num" id="sliderCombos">2</div>
+          <div class="lbl">možných kombinací</div>
+        </div>
+      </div>
+    </div>
+
+    <table class="bit-table" id="bitTable">
+      <tr><th>Počet bitů</th><th>Výpočet</th><th>Počet znaků, které zakódujeme</th></tr>
+    </table>
+  </div>
+
+  <!-- CO JE ASCII -->
+  <div class="card">
+    <h2>🔤 Co je to ASCII?</h2>
+    <p>Aby počítač uměl uložit text, potřebuje pro <b>každé písmenko, číslici i znaménko</b> přiřadit nějaké číslo – a to číslo pak zapsat pomocí bitů (nul a jedniček). Tuhle „očíslovanou abecedu" vymysleli lidé už v 60. letech a nazvali ji <b>ASCII</b>.</p>
+    <div class="explain-box">
+      Například písmeno <b>A</b> má v ASCII číslo <b>65</b>, mezera má číslo <b>32</b>. Počítač si pak jen pamatuje čísla – a když je má zobrazit, podívá se do tabulky ASCII a ví, že „65" znamená „A".
+    </div>
+  </div>
+
+  <!-- PROC 7 BITU -->
+  <div class="card">
+    <h2>🤔 Proč má ASCII zrovna <span class="tag">7 bitů</span>?</h2>
+    <p>Tvůrci ASCII potřebovali očíslovat:</p>
+    <ul style="line-height:1.8;">
+      <li>malá písmena <b>a–z</b> (26 znaků)</li>
+      <li>velká písmena <b>A–Z</b> (26 znaků)</li>
+      <li>číslice <b>0–9</b> (10 znaků)</li>
+      <li>znaménka jako <b>. , ! ? ( ) mezera</b> a pár speciálních „povelů" pro tehdejší stroje</li>
+    </ul>
+    <p>Když to sečteš, potřebuješ přes 100 různých kódů. A jak jsi viděl/a v tabulce výše – <b>7 bitů</b> dává přesně <b>128 kombinací</b>, což bylo tak akorát! Ani moc málo, ani zbytečně moc navíc.</p>
+    <div class="explain-box">
+      ASCII vznikalo v USA pro anglický jazyk – a angličtina žádné háčky ani čárky nemá. Proto se s 128 znaky vůbec nepočítalo s písmeny jako <b>č, ř, ž, ů</b>… a tady začíná náš další problém. 👇
+    </div>
+  </div>
+
+  <!-- PROC 8 BITU -->
+  <div class="card">
+    <h2>🇨🇿 Proč se někdy potřebuje <span class="tag">8 bitů</span>?</h2>
+    <p>Když chtěli lidé v jiných zemích psát počítačem ve své řeči, zjistili, že 128 kódů z originální ASCII už nestačí – všechny byly obsazené anglickou abecedou a znaménky. Potřebovali místo navíc pro písmena jako <b>á, č, ď, é, ě, í, ň, ó, ř, š, ť, ú, ů, ý, ž</b>.</p>
+    <div class="explain-box green">
+      Řešení bylo jednoduché: přidat <b>jeden bit navíc</b>! Jak jsi viděl/a v tabulce, 7 bitů dá 128 kombinací, ale <b>8 bitů dá rovnou 256 kombinací</b> – to je přesně dvojnásobek. Prvních 128 kódů zůstalo stejných jako v původní ASCII (anglická písmena, číslice…) a druhá půlka (128–255) se využila pro nová písmenka s háčky a čárkami. Tomuto rozšíření se říká <b>rozšířená ASCII</b>.
+    </div>
+  </div>
+
+  <!-- TABULKA BITU -->
+  <!-- (naplněna JS výše ve funkci renderBitTable) -->
+
+  <!-- PREVODNIK -->
+  <div class="card">
+    <h2>🔄 Vyzkoušej si to! Převodník text → bity</h2>
+    <p>Napiš libovolné slovo (klidně i s háčky a čárkami) a uvidíš, jak by ho „vidělo" počítač:</p>
+    <div class="converter-input">
+      <input type="text" id="wordInput" placeholder="Např. ahoj nebo příšerně..." maxlength="20">
+      <button class="go-btn" onclick="convertWord()">🚀 Přelož na bity</button>
+    </div>
+
+    <div id="modeNote"></div>
+
+    <div class="binary-output" id="binaryOutput"></div>
+  </div>
+
+  <footer>Bity, bajty a ASCII — malý výlet do útrob počítače 💻</footer>
+</div>
+
+<script>
+  // ---------- binary rain background ----------
+  (function(){
+    const el = document.getElementById('binaryRain');
+    let rows = [];
+    for(let r=0;r<40;r++){
+      let row = '';
+      for(let c=0;c<80;c++){ row += Math.random()>0.5 ? '1' : '0'; }
+      rows.push(row);
+    }
+    el.innerHTML = rows.join('<br>');
+  })();
+
+  // ---------- switch demo ----------
+  function toggleSwitch(){
+    const sw = document.getElementById('demoSwitch');
+    sw.classList.toggle('on');
+    document.getElementById('switchLabel').textContent = sw.classList.contains('on') ? '1' : '0';
+  }
+
+  // ---------- bit slider + table ----------
+  function updateSlider(){
+    const bits = parseInt(document.getElementById('bitSlider').value);
+    document.getElementById('sliderBits').textContent = bits;
+    document.getElementById('sliderCombos').textContent = Math.pow(2,bits);
+  }
+
+  function renderBitTable(){
+    const table = document.getElementById('bitTable');
+    for(let b=1;b<=8;b++){
+      const tr = document.createElement('tr');
+      if(b===7) tr.className = 'highlight-7';
+      if(b===8) tr.className = 'highlight-8';
+      tr.innerHTML = `<td>${b} bit${b>1?'y':''}</td><td>2<sup>${b}</sup></td><td>${Math.pow(2,b)} znaků${b===7?' 🟡 (ASCII)':''}${b===8?' 🟢 (rozšířená ASCII)':''}</td>`;
+      table.appendChild(tr);
+    }
+  }
+  renderBitTable();
+  updateSlider();
+
+  // ---------- ASCII / extended table ----------
+  // Zjednodušená ukázková tabulka pro české znaky (128–157).
+  // V reálných počítačích se pro tohle používají tzv. kódové stránky (např. Windows-1250),
+  // které mají čísla přiřazená trochu jinak – princip je ale úplně stejný.
+  const extendedMap = {
+    'á':128,'Á':129,'č':130,'Č':131,'ď':132,'Ď':133,'é':134,'É':135,
+    'ě':136,'Ě':137,'í':138,'Í':139,'ň':140,'Ň':141,'ó':142,'Ó':143,
+    'ř':144,'Ř':145,'š':146,'Š':147,'ť':148,'Ť':149,'ú':150,'Ú':151,
+    'ů':152,'Ů':153,'ý':154,'Ý':155,'ž':156,'Ž':157
+  };
+
+  function getCharCode(ch){
+    const basic = ch.charCodeAt(0);
+    if(basic < 128) return {code: basic, extended:false};
+    if(extendedMap[ch] !== undefined) return {code: extendedMap[ch], extended:true};
+    // neznámý znak mimo naši ukázkovou tabulku - zobrazíme aspoň něco
+    return {code: 63, extended:true}; // '?' jako zástupný znak
+  }
+
+  function toBinary(num, len){
+    return num.toString(2).padStart(len,'0');
+  }
+
+  function convertWord(){
+    const word = document.getElementById('wordInput').value;
+    const output = document.getElementById('binaryOutput');
+    const note = document.getElementById('modeNote');
+    output.innerHTML = '';
+    note.className = '';
+    note.innerHTML = '';
+
+    if(!word.trim()){
+      output.innerHTML = '<p style="color:#888;">Napiš nějaké slovo a zkus to znovu 🙂</p>';
+      return;
+    }
+
+    const chars = [...word];
+    const infos = chars.map(getCharCode);
+    const needsExtended = infos.some(i => i.extended);
+    const bitLen = needsExtended ? 8 : 7;
+
+    if(needsExtended){
+      note.className = 'mode8';
+      note.innerHTML = '🟢 Tvé slovo obsahuje český znak s háčkem nebo čárkou, který se do základní ASCII (7 bitů = 128 kódů) nevejde. Proto počítač použije <b>8 bitů</b> – tím získá 256 možných kódů a je pro něj místo i na tenhle znak. Kvůli konzistenci pak celé slovo zapíšeme po osmi bitech.';
+    } else {
+      note.className = 'mode7';
+      note.innerHTML = '🟡 Tvé slovo obsahuje jen znaky ze základní anglické ASCII, takže bohatě stačí <b>7 bitů</b> (128 kódů).';
+    }
+
+    infos.forEach((info, idx) => {
+      const block = document.createElement('div');
+      block.className = 'letter-block' + (info.extended ? ' ext' : '');
+      block.innerHTML = `
+        <div class="char">${chars[idx] === ' ' ? '␣' : chars[idx]}</div>
+        <div class="bits">${toBinary(info.code, bitLen)}</div>
+        <div class="dec">dekadicky: ${info.code}</div>
+      `;
+      output.appendChild(block);
+    });
+  }
+</script>
+</body>
+</html>
