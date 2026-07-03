@@ -13,7 +13,7 @@
             background-color: #1e293b;
             color: #1a1a1a;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -27,7 +27,7 @@
             box-shadow: 10px 10px 0px #0ea5e9;
             border-radius: 16px;
             padding: 30px;
-            margin-top: 20px;
+            margin-top: 10px;
         }
         h1 {
             font-family: 'Impact', sans-serif;
@@ -78,7 +78,7 @@
             border-radius: 8px;
             margin-bottom: 15px;
             text-align: center;
-            user-select: none; /* Zabrani kopirovani */
+            user-select: none;
             -webkit-user-select: none;
             pointer-events: none;
         }
@@ -95,6 +95,7 @@
             border-radius: 8px;
             outline: none;
             transition: all 0.2s;
+            width: 100%;
         }
         input[type="text"]:focus {
             border-color: #0ea5e9;
@@ -140,6 +141,7 @@
             visibility: hidden;
             opacity: 0;
             transition: all 0.2s;
+            padding: 15px;
         }
         .modal-overlay.active {
             visibility: visible;
@@ -147,12 +149,14 @@
         }
         .modal-content {
             background: white;
-            padding: 30px;
+            padding: 25px;
             border: 4px solid #000;
             box-shadow: 8px 8px 0px #000;
             border-radius: 12px;
             max-width: 500px;
-            width: 90%;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         .modal-content h2 {
             margin-top: 0;
@@ -171,6 +175,8 @@
             border-radius: 6px;
             font-family: monospace;
             font-weight: bold;
+            display: inline-block;
+            margin: 2px 0;
         }
         .modal-close {
             display: block;
@@ -184,10 +190,60 @@
             cursor: pointer;
             border-radius: 8px;
             text-align: center;
-            margin-top: 20px;
+            margin-top: 15px;
         }
         .modal-close:hover {
             background: #0284c7;
+        }
+
+        /* ====== RESPONSIVNÍ DESIGN PRO MOBILY ====== */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+                border-width: 3px;
+                box-shadow: 6px 6px 0px #0ea5e9;
+            }
+            h1 {
+                font-size: 1.8rem;
+                padding: 10px;
+                letter-spacing: 1px;
+            }
+            .intro {
+                font-size: 1rem;
+                padding: 15px;
+            }
+            .task-card {
+                padding: 15px;
+            }
+            .target-sentence {
+                font-size: 1.1rem;
+                padding: 12px;
+            }
+            .input-row {
+                display: grid;
+                grid-template-columns: 1fr auto; 
+                gap: 10px;
+            }
+            input[type="text"] {
+                font-size: 1rem;
+                padding: 12px;
+            }
+            .status-icon {
+                font-size: 1.5rem;
+                width: 30px;
+            }
+            .btn-hint {
+                grid-column: 1 / 3; 
+                width: 100%;
+                font-size: 1rem;
+                padding: 12px;
+            }
+            .modal-content {
+                padding: 20px;
+            }
+            .hint-list {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
@@ -203,39 +259,35 @@
         </div>
 
         <div class="task-container">
-            <!-- Veta 1 -->
             <div class="task-card" id="card-1">
                 <div class="target-sentence" id="target-1">Taťána dostala poukázku do H&M za 25€.</div>
                 <div class="input-row">
                     <input type="text" id="input-1" placeholder="Opiš zprávu sem..." oninput="checkInput(1)" autocomplete="off" spellcheck="false">
-                    <button class="btn-hint" onclick="showHint(1)">❓ Nápověda</button>
                     <div class="status-icon" id="status-1">⬜</div>
+                    <button class="btn-hint" onclick="showHint(1)">❓ Nápověda</button>
                 </div>
             </div>
 
-            <!-- Veta 2 -->
             <div class="task-card" id="card-2">
                 <div class="target-sentence" id="target-2">Pastrňák s číslem #88 dal pětistý gól a získal bonus $100000!</div>
                 <div class="input-row">
                     <input type="text" id="input-2" placeholder="Opiš zprávu sem..." oninput="checkInput(2)" autocomplete="off" spellcheck="false">
-                    <button class="btn-hint" onclick="showHint(2)">❓ Nápověda</button>
                     <div class="status-icon" id="status-2">⬜</div>
+                    <button class="btn-hint" onclick="showHint(2)">❓ Nápověda</button>
                 </div>
             </div>
 
-            <!-- Veta 3 -->
             <div class="task-card" id="card-3">
                 <div class="target-sentence" id="target-3">Vytočte *33 a potvrďte # anebo napište na podpora@firma.cz.</div>
                 <div class="input-row">
                     <input type="text" id="input-3" placeholder="Opiš zprávu sem..." oninput="checkInput(3)" autocomplete="off" spellcheck="false">
-                    <button class="btn-hint" onclick="showHint(3)">❓ Nápověda</button>
                     <div class="status-icon" id="status-3">⬜</div>
+                    <button class="btn-hint" onclick="showHint(3)">❓ Nápověda</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal pro napovedu -->
     <div class="modal-overlay" id="hintModal">
         <div class="modal-content">
             <h2>💡 Klávesnicový tahák</h2>
@@ -276,10 +328,10 @@
         });
 
         function checkInput(id) {
-            const targetText = document.getElementById(`target-${id}`).innerText;
-            const inputField = document.getElementById(`input-${id}`);
-            const statusIcon = document.getElementById(`status-${id}`);
-            const card = document.getElementById(`card-${id}`);
+            const targetText = document.getElementById(\`target-\${id}\`).innerText;
+            const inputField = document.getElementById(\`input-\${id}\`);
+            const statusIcon = document.getElementById(\`status-\${id}\`);
+            const card = document.getElementById(\`card-\${id}\`);
 
             if (inputField.value === targetText) {
                 inputField.classList.add('correct');
