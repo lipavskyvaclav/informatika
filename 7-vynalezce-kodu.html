@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staň se vynálezcem kódů!</title>
+<style>
+  :root{
+    --paper:#faf3e4;
+    --paper-dark:#efe3c9;
+    --ink:#3b2f1e;
+    --brown:#8a5a2b;
+    --brown-dark:#5f3d1c;
+    --gold:#c99a3c;
+    --green:#3f7d52;
+    --red:#b83b3b;
+    --blue:#2f5f8a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Georgia','Times New Roman',serif;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(201,154,60,0.08), transparent 40%),
+      radial-gradient(circle at 80% 60%, rgba(138,90,43,0.10), transparent 45%),
+      var(--paper);
+    color:var(--ink);
+    padding:24px 12px 70px;
+  }
+  .wrap{max-width:880px;margin:0 auto;}
+
+  header{
+    text-align:center;
+    background:linear-gradient(135deg,var(--brown) 0%,var(--brown-dark) 100%);
+    color:var(--paper);
+    padding:28px 20px;
+    border-radius:16px;
+    box-shadow:0 8px 24px rgba(95,61,28,0.35);
+    margin-bottom:22px;
+    position:relative;
+  }
+  header h1{
+    margin:0 0 8px;
+    font-size:1.9em;
+    letter-spacing:.5px;
+  }
+  header p{
+    margin:0;
+    font-size:1.02em;
+    line-height:1.55;
+    opacity:.95;
+  }
+
+  .id-card{
+    background:var(--paper-dark);
+    border:2px dashed var(--brown);
+    border-radius:12px;
+    padding:16px 20px;
+    margin-bottom:24px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:16px;
+  }
+  .id-field{flex:1;min-width:180px;}
+  .id-field label{
+    display:block;
+    font-weight:700;
+    color:var(--brown-dark);
+    margin-bottom:4px;
+    font-size:.95em;
+  }
+  .id-field input{
+    width:100%;
+    padding:8px 10px;
+    border:2px solid var(--brown);
+    border-radius:8px;
+    background:var(--paper);
+    font-family:inherit;
+    font-size:1em;
+    color:var(--ink);
+  }
+
+  .station{
+    background:var(--paper);
+    border:2px solid var(--paper-dark);
+    border-radius:16px;
+    padding:22px 24px;
+    margin-bottom:24px;
+    box-shadow:0 6px 18px rgba(95,61,28,0.12);
+    position:relative;
+  }
+  .station::before{
+    content:attr(data-num);
+    position:absolute;
+    top:-16px;
+    left:22px;
+    background:var(--gold);
+    color:var(--paper);
+    font-weight:700;
+    padding:4px 14px;
+    border-radius:20px;
+    font-size:.85em;
+    box-shadow:0 3px 8px rgba(0,0,0,0.2);
+  }
+  .station-title{
+    font-size:1.35em;
+    font-weight:700;
+    color:var(--brown-dark);
+    margin:10px 0 4px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .station-year{
+    color:var(--gold);
+    font-weight:700;
+    font-size:.95em;
+  }
+  .event-text{
+    background:var(--paper-dark);
+    border-left:4px solid var(--brown);
+    padding:12px 16px;
+    border-radius:8px;
+    line-height:1.6;
+    margin:14px 0 18px;
+    font-size:.98em;
+  }
+
+  .question{
+    margin-bottom:16px;
+  }
+  .question label{
+    display:block;
+    font-weight:700;
+    color:var(--brown-dark);
+    margin-bottom:6px;
+    line-height:1.4;
+  }
+  .question input[type="text"], .question textarea{
+    width:100%;
+    padding:10px 12px;
+    border:2px solid var(--brown);
+    border-radius:8px;
+    background:#fffdf8;
+    font-family:inherit;
+    font-size:1em;
+    color:var(--ink);
+  }
+  .question textarea{min-height:60px;resize:vertical;}
+  .question input[type="text"]:focus, .question textarea:focus{
+    outline:none;
+    border-color:var(--gold);
+    background:#fffef9;
+  }
+
+  /* Braille section */
+  .braille-box{
+    background:var(--paper-dark);
+    border-radius:12px;
+    padding:18px;
+    margin-top:8px;
+  }
+  .braille-cells{
+    display:flex;
+    flex-wrap:wrap;
+    gap:18px;
+    margin-bottom:14px;
+  }
+  .braille-cell-wrap{
+    text-align:center;
+  }
+  .braille-cell{
+    display:grid;
+    grid-template-columns:repeat(2,36px);
+    grid-template-rows:repeat(3,36px);
+    gap:6px;
+    background:#fffdf8;
+    border:2px solid var(--brown);
+    border-radius:10px;
+    padding:8px;
+  }
+  .dot{
+    width:36px;height:36px;
+    border-radius:50%;
+    border:2px solid var(--brown);
+    background:#fffdf8;
+    cursor:pointer;
+    transition:all .15s;
+  }
+  .dot.active{
+    background:var(--gold);
+    border-color:var(--brown-dark);
+    box-shadow:0 0 0 3px rgba(201,154,60,0.35), inset 0 0 6px rgba(0,0,0,0.25);
+  }
+  .braille-cell-wrap input{
+    margin-top:8px;
+    width:100px;
+    padding:6px 8px;
+    border:2px solid var(--brown);
+    border-radius:6px;
+    text-align:center;
+    font-family:inherit;
+  }
+  .braille-controls{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  .btn{
+    background:var(--brown);
+    color:var(--paper);
+    border:none;
+    padding:10px 20px;
+    border-radius:9px;
+    font-family:inherit;
+    font-size:.95em;
+    font-weight:700;
+    cursor:pointer;
+    transition:background .15s;
+  }
+  .btn:hover{background:var(--brown-dark);}
+  .btn.secondary{
+    background:transparent;
+    color:var(--brown-dark);
+    border:2px solid var(--brown);
+  }
+  .btn.secondary:hover{background:var(--paper-dark);}
+
+  .save-section{
+    text-align:center;
+    background:linear-gradient(135deg,var(--green) 0%,#2f5f42 100%);
+    color:var(--paper);
+    border-radius:16px;
+    padding:26px 20px;
+    margin-top:10px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.2);
+  }
+  .save-section p{margin:0 0 14px;line-height:1.5;}
+  .save-btn{
+    background:var(--paper);
+    color:var(--green);
+    border:none;
+    padding:14px 30px;
+    border-radius:10px;
+    font-size:1.1em;
+    font-weight:700;
+    cursor:pointer;
+    box-shadow:0 4px 12px rgba(0,0,0,0.2);
+  }
+  .save-btn:hover{background:#f0f0f0;}
+  .save-note{
+    margin-top:12px;
+    font-size:.85em;
+    opacity:.9;
+  }
+  .saved-flash{
+    display:none;
+    margin-top:10px;
+    background:rgba(255,255,255,0.2);
+    border-radius:8px;
+    padding:8px 12px;
+    font-weight:700;
+  }
+
+  footer{
+    text-align:center;
+    color:var(--brown-dark);
+    opacity:.75;
+    font-size:.85em;
+    margin-top:20px;
+  }
+
+  @media(max-width:600px){
+    header h1{font-size:1.5em;}
+    .braille-cell{grid-template-columns:repeat(2,30px);grid-template-rows:repeat(3,30px);}
+    .dot{width:30px;height:30px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>🕰️ Staň se vynálezcem kódů!</h1>
+    <p>Cestujete v čase. Na každé zastávce narazíte na problém, který trápil lidstvo. Vžijte se do role vynálezců: zkoumejte, objevujte a vyzkoušejte si dobové kódy v praxi!</p>
+  </header>
+
+  <div class="id-card">
+    <div class="id-field">
+      <label>Jméno a příjmení</label>
+      <input type="text" id="studentName" placeholder="Napiš své jméno...">
+    </div>
+    <div class="id-field">
+      <label>Třída</label>
+      <input type="text" id="studentClass" placeholder="Např. 8.A">
+    </div>
+  </div>
+
+  <!-- STANICE 1 -->
+  <div class="station" data-num="Zastávka 1">
+    <div class="station-title">🚢 Bouře a ticho na oceánu <span class="station-year">— rok 1817</span></div>
+    <div class="event-text">
+      Jste kapitánem plachetnice. Na moři je silná bouře a vy nutně potřebujete sdělit lodi plující kilometr od vás, že máte na palubě nebezpečný náklad – střelný prach! Křičet nepomůže, vysílačky ještě neexistují. Potřebujete systém, který bude vidět i přes vlny.
+    </div>
+    <div class="question">
+      <label>1. Jak se váš nový kód jmenuje?</label>
+      <input type="text" placeholder="Odpověď...">
+    </div>
+    <div class="question">
+      <label>2. V čem spočívá jeho hlavní výhoda? (Jak obrovská námořní loď posílá zprávy?)</label>
+      <textarea placeholder="Odpověď..."></textarea>
+    </div>
+    <div class="question">
+      <label>3. Najděte si kód na internetu. Co přesně znamená bílá vlajka s červeným křížem po úhlopříčkách?</label>
+      <textarea placeholder="Odpověď..."></textarea>
+    </div>
+  </div>
+
+  <!-- STANICE 2 -->
+  <div class="station" data-num="Zastávka 2">
+    <div class="station-title">🖐️ Knihy, které nejdou číst <span class="station-year">— rok 1824</span></div>
+    <div class="event-text">
+      Jste patnáctiletý student v Paříži, který v dětství ztratil zrak. Knihy pro nevidomé už existují, ale písmena jsou v nich jen „vytlačená“ klasická abeceda. Přejíždět prstem po složitých tvarech písmen je strašně pomalé a únavné. Potřebujete tvary zjednodušit tak, aby je bříško prstu přečetlo bleskově.
+    </div>
+    <div class="question">
+      <label>1. Jak se tento slavný kód jmenuje?</label>
+      <input type="text" placeholder="Odpověď...">
+    </div>
+    <div class="question">
+      <label>2. Proč jste klasická písmena nahradili právě tečkami?</label>
+      <textarea placeholder="Odpověď..."></textarea>
+    </div>
+    <div class="question">
+      <label>3. Kolik bodů (teček) tvoří základní mřížku pro vytvoření každého znaku?</label>
+      <input type="text" placeholder="Odpověď...">
+    </div>
+    <div class="question">
+      <label>4. Zakresli, jak vypadá počáteční písmeno tvého jména. Rozklikej tečky, které mají „vystoupit":</label>
+      <div class="braille-box">
+        <div class="braille-cells" id="brailleCells">
+          <!-- cells added by JS -->
+        </div>
+        <div class="braille-controls">
+          <button class="btn secondary" type="button" onclick="addBrailleCell()">➕ Přidat další písmeno</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STANICE 3 -->
+  <div class="station" data-num="Zastávka 3">
+    <div class="station-title">⚡ Zkrocení blesku <span class="station-year">— rok 1844</span></div>
+    <div class="event-text">
+      Natáhli jste měděný drát mezi dvěma městy. Už víte, jak jím poslat elektrický proud, ale neumíte drátem poslat lidský hlas. Umíte jen jediné: stisknutím tlačítka pustit proud na krátkou nebo delší chvíli.
+    </div>
+    <div class="question">
+      <label>1. Jak se jmenuje kód, který svět navždy propojil?</label>
+      <input type="text" placeholder="Odpověď...">
+    </div>
+    <div class="question">
+      <label>2. Z čeho se tento kód skládá? (Jaké dva prvky ho tvoří?)</label>
+      <input type="text" placeholder="Odpověď...">
+    </div>
+    <div class="question">
+      <label>3. Pomocí kódu zakódujte volání o pomoc SOS:</label>
+      <input type="text" placeholder="Odpověď...">
+    </div>
+  </div>
+
+  <!-- STANICE 4 -->
+  <div class="station" data-num="Zastávka 4">
+    <div class="station-title">✈️ Zmatek v oblacích <span class="station-year">— rok 1956</span></div>
+    <div class="event-text">
+      Nastoupila zlatá éra letectví. Letoví dispečeři navigují letadla pomocí rádiových stanic, ale signál často chrčí a vypadává. Když dispečer hlásí „Leťte k bodu B", pilot slyší „D", „P" nebo „T" a letadlo letí špatným směrem. Z obyčejné abecedy se stal smrtelný problém.
+    </div>
+    <div class="question">
+      <label>1. Jaký kód lidé z letectví a armády vymysleli, aby se už nikdy nepřeslechli?</label>
+      <input type="text" placeholder="Odpověď...">
+    </div>
+    <div class="question">
+      <label>2. Jak tento kód funguje? (Co uděláte s obyčejným písmenem?)</label>
+      <textarea placeholder="Odpověď..."></textarea>
+    </div>
+    <div class="question">
+      <label>3. Pilot se ptá na vaše křestní jméno. Vyhláskujte mu ho pomocí tohoto kódu (např. Alfa, Bravo...):</label>
+      <textarea placeholder="Odpověď..."></textarea>
+    </div>
+  </div>
+
+  <!-- STANICE 5 -->
+  <div class="station" data-num="Zastávka 5">
+    <div class="station-title">🛒 Nekonečná fronta u pokladny <span class="station-year">— rok 1974</span></div>
+    <div class="event-text">
+      Otevírají se první obrovské supermarkety. Zákazníci mají plné vozíky, ale prodavačky musí u pokladny ručně naťukat cenu každé jednotlivé položky. Tvoří se hodinové fronty a dělají se chyby. Potřebujete, aby si pokladní stroj (čtečka) uměl číslo zboží přečíst sám a bleskově.
+    </div>
+    <div class="question">
+      <label>1. Jak se jmenuje kód, který najdete v obchodě na každém obalu?</label>
+      <input type="text" placeholder="Odpověď...">
+    </div>
+    <div class="question">
+      <label>2. Proč byl vynalezen? (Komu/čemu tento kód usnadňuje čtení?)</label>
+      <textarea placeholder="Odpověď..."></textarea>
+    </div>
+    <div class="question">
+      <label>3. Jak to, že z něj čtečka pozná různá čísla? V čem se jednotlivé svislé čáry od sebe liší?</label>
+      <textarea placeholder="Odpověď..."></textarea>
+    </div>
+  </div>
+
+  <div class="save-section">
+    <p>Až vyplníš všechny odpovědi, ulož si svůj pracovní list do počítače. Otevře se v prohlídeči přesně tak, jak ho vidíš teď – i se všemi vyplněnými odpověďmi.</p>
+    <button class="save-btn" onclick="saveWorksheet()">💾 Uložit vyplněný list</button>
+    <div class="saved-flash" id="savedFlash">✅ Soubor byl stažen! Zkontroluj složku Stažené soubory.</div>
+    <div class="save-note">Soubor se uloží jako .html – pošli ho učiteli nebo si ho ulož k sobě.</div>
+  </div>
+
+  <footer>Staň se vynálezcem kódů — historické okénko do světa komunikace</footer>
+</div>
+
+<script>
+  // ---------- Braille interactive cells ----------
+  let brailleCellCount = 0;
+
+  function createBrailleCell(){
+    brailleCellCount++;
+    const wrap = document.createElement('div');
+    wrap.className = 'braille-cell-wrap';
+
+    const cell = document.createElement('div');
+    cell.className = 'braille-cell';
+    // Standard braille dot order: 1 4 / 2 5 / 3 6
+    const order = [1,4,2,5,3,6];
+    order.forEach(n => {
+      const dot = document.createElement('div');
+      dot.className = 'dot';
+      dot.setAttribute('data-dot', n);
+      dot.onclick = () => dot.classList.toggle('active');
+      cell.appendChild(dot);
+    });
+
+    const label = document.createElement('input');
+    label.type = 'text';
+    label.placeholder = 'Které písmeno?';
+    label.maxLength = 3;
+
+    wrap.appendChild(cell);
+    wrap.appendChild(label);
+    return wrap;
+  }
+
+  function addBrailleCell(){
+    document.getElementById('brailleCells').appendChild(createBrailleCell());
+  }
+  // start with one cell
+  addBrailleCell();
+
+  // ---------- Save worksheet with answers ----------
+  function saveWorksheet(){
+    // bake current input values into the HTML attributes so they persist when reopened
+    document.querySelectorAll('input[type="text"]').forEach(el => {
+      el.setAttribute('value', el.value);
+    });
+    document.querySelectorAll('textarea').forEach(el => {
+      el.textContent = el.value;
+    });
+    // dot states are already reflected as 'active' class in the live DOM
+
+    const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    const blob = new Blob([htmlContent], {type: 'text/html;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+
+    const nameVal = document.getElementById('studentName').value.trim();
+    const safeName = nameVal ? nameVal.replace(/[^a-zA-Z0-9áéíóúůýčďěňřšťžÁÉÍÓÚŮÝČĎĚŇŘŠŤŽ_ -]/g,'').trim() : 'pracovni_list';
+    const filename = (safeName || 'pracovni_list') + '_vynalezce_kodu.html';
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    const flash = document.getElementById('savedFlash');
+    flash.style.display = 'block';
+    setTimeout(() => { flash.style.display = 'none'; }, 4000);
+  }
+</script>
+</body>
+</html>
