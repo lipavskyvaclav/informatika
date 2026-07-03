@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caesarova šifra – interaktivní nástroj</title>
+<style>
+  :root{
+    --purple:#6c5ce7;
+    --purple-dark:#4834b0;
+    --pink:#fd79a8;
+    --green:#00b894;
+    --red:#e74c3c;
+    --bg:#f4f2fb;
+    --card:#ffffff;
+    --text:#2d2d3a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg,#6c5ce7 0%,#a29bfe 45%,#fd79a8 100%);
+    min-height:100vh;
+    padding:24px 12px 60px;
+    color:var(--text);
+  }
+  .wrap{max-width:900px;margin:0 auto;}
+  header{
+    text-align:center;
+    color:white;
+    margin-bottom:28px;
+  }
+  header h1{
+    font-size:2.1em;
+    margin:0 0 6px;
+    text-shadow:0 2px 6px rgba(0,0,0,0.15);
+  }
+  header p{
+    margin:0;
+    opacity:.95;
+    font-size:1.05em;
+  }
+  .card{
+    background:var(--card);
+    border-radius:18px;
+    padding:24px 26px;
+    margin-bottom:22px;
+    box-shadow:0 10px 30px rgba(60,40,120,0.15);
+  }
+  .card h2{
+    margin-top:0;
+    color:var(--purple-dark);
+    font-size:1.3em;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:28px;height:28px;
+    background:var(--purple);
+    color:white;
+    border-radius:50%;
+    font-size:.9em;
+    flex-shrink:0;
+  }
+  .explain{
+    background:#f0edfc;
+    border-left:4px solid var(--purple);
+    padding:14px 18px;
+    border-radius:8px;
+    line-height:1.55;
+    font-size:.98em;
+  }
+  .explain b{color:var(--purple-dark);}
+
+  /* Shift selector */
+  .shift-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:16px 0;
+    justify-content:center;
+  }
+  .shift-btn{
+    width:52px;height:52px;
+    border-radius:50%;
+    border:2px solid var(--purple);
+    background:white;
+    color:var(--purple-dark);
+    font-size:1.1em;
+    font-weight:700;
+    cursor:pointer;
+    transition:all .15s;
+  }
+  .shift-btn:hover{background:#ece8fd;}
+  .shift-btn.active{
+    background:var(--purple);
+    color:white;
+    transform:scale(1.08);
+    box-shadow:0 4px 12px rgba(108,92,231,0.4);
+  }
+
+  /* Alphabet wheel */
+  .alpha-wheel{
+    overflow-x:auto;
+    padding:10px 0;
+  }
+  .alpha-table{
+    border-collapse:collapse;
+    margin:0 auto;
+    font-family:'Consolas','Courier New',monospace;
+  }
+  .alpha-table td{
+    width:32px;height:32px;
+    text-align:center;
+    font-size:.95em;
+    border:1px solid #e0ddf5;
+  }
+  .alpha-table tr:first-child td{
+    background:#f0edfc;
+    font-weight:700;
+    color:var(--purple-dark);
+  }
+  .alpha-table tr:last-child td{
+    background:var(--purple);
+    color:white;
+    font-weight:700;
+  }
+
+  textarea{
+    width:100%;
+    min-height:90px;
+    border-radius:10px;
+    border:2px solid #ddd6f7;
+    padding:12px;
+    font-size:1.05em;
+    font-family:inherit;
+    resize:vertical;
+  }
+  textarea:focus{outline:none;border-color:var(--purple);}
+
+  .mode-row{
+    display:flex;
+    gap:10px;
+    margin:14px 0;
+  }
+  .mode-btn{
+    flex:1;
+    padding:10px;
+    border-radius:10px;
+    border:2px solid var(--purple);
+    background:white;
+    color:var(--purple-dark);
+    font-weight:700;
+    cursor:pointer;
+    font-size:1em;
+  }
+  .mode-btn.active{background:var(--purple);color:white;}
+
+  .output-box{
+    background:#f0edfc;
+    border-radius:10px;
+    padding:14px;
+    min-height:60px;
+    font-size:1.1em;
+    font-family:'Consolas','Courier New',monospace;
+    word-break:break-word;
+    white-space:pre-wrap;
+    color:var(--purple-dark);
+    font-weight:600;
+  }
+
+  .btn{
+    background:var(--purple);
+    color:white;
+    border:none;
+    padding:12px 22px;
+    border-radius:10px;
+    font-size:1em;
+    font-weight:700;
+    cursor:pointer;
+    margin-top:10px;
+    transition:background .15s;
+  }
+  .btn:hover{background:var(--purple-dark);}
+  .btn.secondary{
+    background:white;
+    color:var(--purple-dark);
+    border:2px solid var(--purple);
+  }
+  .btn.secondary:hover{background:#f0edfc;}
+
+  /* Challenges */
+  .challenge{
+    border:2px solid #ece8fd;
+    border-radius:12px;
+    padding:16px 18px;
+    margin-bottom:16px;
+  }
+  .challenge-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .shift-tag{
+    background:var(--pink);
+    color:white;
+    padding:4px 12px;
+    border-radius:20px;
+    font-size:.85em;
+    font-weight:700;
+  }
+  .cipher-text{
+    font-family:'Consolas','Courier New',monospace;
+    font-size:1.15em;
+    letter-spacing:1px;
+    background:#f9f8fd;
+    padding:10px 14px;
+    border-radius:8px;
+    margin-bottom:10px;
+    color:var(--purple-dark);
+    font-weight:700;
+  }
+  .challenge input[type="text"]{
+    width:100%;
+    padding:10px 12px;
+    border-radius:8px;
+    border:2px solid #ddd6f7;
+    font-size:1em;
+    margin-bottom:8px;
+  }
+  .challenge input[type="text"]:focus{outline:none;border-color:var(--purple);}
+  .feedback{
+    font-weight:700;
+    margin-top:6px;
+    min-height:20px;
+  }
+  .feedback.correct{color:var(--green);}
+  .feedback.wrong{color:var(--red);}
+
+  footer{
+    text-align:center;
+    color:white;
+    opacity:.85;
+    font-size:.9em;
+    margin-top:20px;
+  }
+
+  @media(max-width:600px){
+    .shift-btn{width:44px;height:44px;font-size:1em;}
+    header h1{font-size:1.6em;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>🔐 Caesarova šifra</h1>
+    <p>Vyzkoušej si šifrování a dešifrování s posunem 1 až 6 písmen</p>
+  </header>
+
+  <div class="card">
+    <h2><span class="badge">?</span> Jak šifra funguje</h2>
+    <div class="explain">
+      Caesarova šifra nahrazuje každé písmeno jiným písmenem, které je v abecedě posunuté o daný počet míst.
+      Například při posunu <b>3</b> se z písmene <b>A</b> stane <b>D</b>, z <b>B</b> se stane <b>E</b> atd.
+      Abeceda se na konci "otočí" zpět na začátek (po <b>Z</b> následuje opět <b>A</b>).
+      Pojmenována je po římském vojevůdci Gaiu Juliu Caesarovi, který ji prý používal k tajné komunikaci se svými veliteli.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge">1</span> Nastav si posun</h2>
+    <div class="shift-row" id="shiftRow"></div>
+    <div class="alpha-wheel">
+      <table class="alpha-table" id="alphaTable"></table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge">2</span> Zašifruj nebo dešifruj vlastní text</h2>
+    <div class="mode-row">
+      <button class="mode-btn active" id="encodeBtn" onclick="setMode('encode')">🔒 Šifrovat</button>
+      <button class="mode-btn" id="decodeBtn" onclick="setMode('decode')">🔓 Dešifrovat</button>
+    </div>
+    <textarea id="inputText" placeholder="Sem napiš text (klidně i s diakritikou – háčky a čárky se nemění)..."></textarea>
+    <button class="btn" onclick="doTransform()">Přelož text</button>
+    <button class="btn secondary" onclick="clearAll()">Vymazat</button>
+    <p style="margin-bottom:6px;font-weight:700;color:var(--purple-dark);">Výsledek:</p>
+    <div class="output-box" id="outputBox">Zde se objeví výsledek…</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="badge">3</span> Procvič si dešifrování</h2>
+    <p style="color:#555;">Zkus rozluštit zprávy zašifrované různým posunem. Napiš odpověď a klikni na "Zkontrolovat".</p>
+    <div id="challenges"></div>
+  </div>
+
+  <footer>Vytvořeno pro výuku – Caesarova šifra 🏫</footer>
+</div>
+
+<script>
+const ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+let currentShift = 3;
+let currentMode = "encode";
+
+function caesarShift(text, shift, mode){
+  const s = mode === "encode" ? shift : (26 - shift) % 26;
+  let result = "";
+  for(const ch of text){
+    const isUpper = ch >= 'A' && ch <= 'Z';
+    const isLower = ch >= 'a' && ch <= 'z';
+    if(isUpper){
+      const idx = ALPHA.indexOf(ch);
+      result += ALPHA[(idx + s) % 26];
+    } else if(isLower){
+      const idx = ALPHA.indexOf(ch.toUpperCase());
+      result += ALPHA[(idx + s) % 26].toLowerCase();
+    } else {
+      result += ch;
+    }
+  }
+  return result;
+}
+
+// build shift buttons 1-6
+const shiftRow = document.getElementById('shiftRow');
+for(let i=1;i<=6;i++){
+  const b = document.createElement('button');
+  b.className = 'shift-btn' + (i===currentShift ? ' active' : '');
+  b.textContent = i;
+  b.onclick = () => {
+    currentShift = i;
+    document.querySelectorAll('.shift-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    renderAlphaTable();
+  };
+  shiftRow.appendChild(b);
+}
+
+function renderAlphaTable(){
+  const table = document.getElementById('alphaTable');
+  table.innerHTML = "";
+  const rowNormal = document.createElement('tr');
+  const rowShift = document.createElement('tr');
+  for(let i=0;i<26;i++){
+    const tdN = document.createElement('td');
+    tdN.textContent = ALPHA[i];
+    rowNormal.appendChild(tdN);
+    const tdS = document.createElement('td');
+    tdS.textContent = ALPHA[(i+currentShift)%26];
+    rowShift.appendChild(tdS);
+  }
+  table.appendChild(rowNormal);
+  table.appendChild(rowShift);
+}
+renderAlphaTable();
+
+function setMode(mode){
+  currentMode = mode;
+  document.getElementById('encodeBtn').classList.toggle('active', mode==='encode');
+  document.getElementById('decodeBtn').classList.toggle('active', mode==='decode');
+}
+
+function doTransform(){
+  const input = document.getElementById('inputText').value;
+  if(!input.trim()){
+    document.getElementById('outputBox').textContent = "Nejdřív napiš nějaký text…";
+    return;
+  }
+  const output = caesarShift(input, currentShift, currentMode);
+  document.getElementById('outputBox').textContent = output;
+}
+
+function clearAll(){
+  document.getElementById('inputText').value = "";
+  document.getElementById('outputBox').textContent = "Zde se objeví výsledek…";
+}
+
+// Challenges: plaintext + shift -> ciphertext generated automatically
+const challengeData = [
+  { plain: "AHOJ SVETE", shift: 1 },
+  { plain: "SKOLA JE SUPER", shift: 2 },
+  { plain: "MAM RAD ANGLICTINU", shift: 3 },
+  { plain: "TAJNA ZPRAVA", shift: 4 },
+  { plain: "DESIFRUJ TENTO TEXT", shift: 5 },
+  { plain: "CAESAROVA SIFRA", shift: 6 }
+];
+
+const challengesDiv = document.getElementById('challenges');
+challengeData.forEach((item, idx) => {
+  const cipher = caesarShift(item.plain, item.shift, 'encode');
+  const div = document.createElement('div');
+  div.className = 'challenge';
+  div.innerHTML = `
+    <div class="challenge-head">
+      <span><b>Zpráva ${idx+1}</b></span>
+      <span class="shift-tag">posun: ${item.shift}</span>
+    </div>
+    <div class="cipher-text">${cipher}</div>
+    <input type="text" placeholder="Sem napiš rozluštěný text..." id="answer-${idx}">
+    <button class="btn secondary" onclick="checkAnswer(${idx}, '${item.plain}')">✅ Zkontrolovat</button>
+    <div class="feedback" id="feedback-${idx}"></div>
+  `;
+  challengesDiv.appendChild(div);
+});
+
+function checkAnswer(idx, correct){
+  const input = document.getElementById('answer-' + idx).value.trim().toUpperCase();
+  const feedback = document.getElementById('feedback-' + idx);
+  if(input === correct){
+    feedback.textContent = "✅ Správně! Výborně!";
+    feedback.className = "feedback correct";
+  } else {
+    feedback.textContent = "❌ Ještě to není ono, zkus to znovu.";
+    feedback.className = "feedback wrong";
+  }
+}
+</script>
+</body>
+</html>
