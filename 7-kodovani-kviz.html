@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<title>Procvičení: Kódování a šifrování</title>
+<style>
+  :root {
+    --pink: #ec3f78;
+    --dark-pink: #9a3352;
+    --yellow: #ffd23f;
+    --teal: #57c4bb;
+    --orange: #f2a33e;
+    --cream: #fdf6e3;
+    --dark: #1a1a1a;
+    --green: #2e8b57;
+    --red-x: #c0392b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--dark);
+    margin: 0;
+    padding: 20px;
+    color: var(--dark);
+  }
+  .app {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .header {
+    background: var(--pink);
+    color: white;
+    padding: 24px 28px;
+    border-radius: 12px 12px 0 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .header h1 {
+    margin: 0 0 6px 0;
+    font-size: 1.8em;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .header p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.95em;
+  }
+  .progress-wrap {
+    background: rgba(255,255,255,0.3);
+    border-radius: 8px;
+    height: 10px;
+    margin-top: 16px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    background: var(--yellow);
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+  .card {
+    background: var(--cream);
+    padding: 30px 28px;
+    border: 3px solid var(--dark);
+    border-top: none;
+  }
+  .qcounter {
+    font-size: 0.85em;
+    font-weight: bold;
+    color: var(--dark-pink);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .question {
+    font-size: 1.25em;
+    font-weight: bold;
+    margin-bottom: 22px;
+    line-height: 1.4;
+  }
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .option {
+    background: white;
+    border: 2px solid var(--dark);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 1.02em;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s ease;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .option:hover:not(.disabled) {
+    background: #fff2e0;
+    transform: translateX(3px);
+  }
+  .option-letter {
+    font-weight: bold;
+    background: var(--dark);
+    color: white;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85em;
+  }
+  .option.correct {
+    background: #d4f4dd;
+    border-color: var(--green);
+  }
+  .option.correct .option-letter {
+    background: var(--green);
+  }
+  .option.incorrect {
+    background: #fbdcd7;
+    border-color: var(--red-x);
+  }
+  .option.incorrect .option-letter {
+    background: var(--red-x);
+  }
+  .option.disabled {
+    cursor: default;
+  }
+  .feedback {
+    margin-top: 18px;
+    padding: 16px 18px;
+    border-radius: 10px;
+    font-size: 0.98em;
+    line-height: 1.5;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct-fb {
+    background: #d4f4dd;
+    border: 2px solid var(--green);
+  }
+  .feedback.incorrect-fb {
+    background: #fbdcd7;
+    border: 2px solid var(--red-x);
+  }
+  .feedback strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 1.05em;
+  }
+  .nav-row {
+    margin-top: 24px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .next-btn {
+    background: var(--dark);
+    color: white;
+    border: none;
+    padding: 12px 26px;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    display: none;
+  }
+  .next-btn.show { display: block; }
+  .next-btn:hover { background: var(--dark-pink); }
+
+  .result-screen {
+    text-align: center;
+  }
+  .result-screen h2 {
+    font-size: 1.6em;
+    margin-bottom: 6px;
+  }
+  .score-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: var(--yellow);
+    border: 4px solid var(--dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin: 20px auto;
+  }
+  .score-circle .num {
+    font-size: 2.2em;
+    font-weight: bold;
+  }
+  .score-circle .denom {
+    font-size: 0.95em;
+  }
+  .result-msg {
+    font-size: 1.05em;
+    margin: 16px 0 24px 0;
+    line-height: 1.5;
+  }
+  .restart-btn {
+    background: var(--pink);
+    color: white;
+    border: none;
+    padding: 14px 30px;
+    border-radius: 8px;
+    font-size: 1.05em;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .restart-btn:hover { background: var(--dark-pink); }
+
+  .review-list {
+    text-align: left;
+    margin-top: 20px;
+    border-top: 2px dashed var(--dark);
+    padding-top: 16px;
+  }
+  .review-item {
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+    font-size: 0.92em;
+  }
+  .review-item .rq {
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+  .review-item.ok { color: var(--green); }
+  .review-item.bad { color: var(--red-x); }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>🔐 Kódování &amp; šifrování</h1>
+    <p>Procvičení k prezentaci — data, kódy, šifry, bity a bajty</p>
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+  </div>
+  <div class="card" id="card">
+    <!-- vyplní JS -->
+  </div>
+</div>
+
+<script>
+const questions = [
+{
+  q: "Jaký je rozdíl mezi daty a informací?",
+  options: [
+    "Data jsou vždy čísla, informace jsou vždy slova",
+    "Informace vznikne z dat, když k nim přidáme kontext",
+    "Data a informace znamenají to samé"
+  ],
+  correct: 1,
+  feedback: [
+    "Data i informace mohou mít různou podobu — čísla, slova, obrázky. Rozdíl je jinde.",
+    "Přesně tak! Data sama o sobě nic moc neříkají, teprve s kontextem dávají smysl.",
+    "Kdyby to bylo totéž, nemělo by smysl mít pro to dvě slova. Zkus to znovu."
+  ]
+},
+{
+  q: "Vidíš u fotbalového zápasu výsledek 3:1. Jaký kontext ti chybí, abys věděl/a, který tým vede?",
+  options: [
+    "Vědět, který tým je domácí a kdo jsou hosté",
+    "Znát přesný čas, kdy padly góly",
+    "Znát jména všech hráčů na hřišti"
+  ],
+  correct: 0,
+  feedback: [
+    "Přesně tak! Čísla 3 a 1 jsou data, ale bez informace, který tým je domácí, nevíš, kdo vede.",
+    "Čas gólů je zajímavý, ale k pochopení výsledku ho nepotřebuješ.",
+    "Jména hráčů ti neřeknou, který tým vede."
+  ]
+},
+{
+  q: "Co je piktogram?",
+  options: [
+    "Tajný kód, který umí přečíst jen stroj",
+    "Obrázkový symbol, který vypadá jako věc, kterou zastupuje",
+    "Jiný název pro QR kód"
+  ],
+  correct: 1,
+  feedback: [
+    "To spíš popisuje šifru nebo strojový kód, ne piktogram.",
+    "Ano! Piktogram na rozdíl od abstraktního symbolu připomíná reálnou věc, kterou znázorňuje.",
+    "QR kód je něco jiného — nese zakódovaná data, ne obrázek podobný realitě."
+  ]
+},
+{
+  q: "Na letišti vidíš piktogram (obrázek přeškrtnutého kufru). I když neumíš jazyk dané země, okamžitě rozumíš informaci „zde není povoleno zavazadlo“. Co to znamená z pohledu kódování?",
+  options: [
+    "Jde o vhodně zvolený kód, který překonává jazykovou bariéru mezi lidmi",
+    "Jde o chybně zvolený kód, protože v reálnémživotě nemáme přeškrtnutá zavazadla",
+    "Jde o složitou šifru, kterou mají dešifrovat pouze pracovníci letiště"
+  ],
+  correct: 0,
+  feedback: [
+    "Ano! Piktogramy fungují mezinárodně, protože se podobají skutečné věci a jejich význam odvodíme.",
+    "Smysl piktogramu je, aby mu všichni rozuměli. Zde ho grafik navrhl správně.",
+    "Kdyby to byla šifra, asi bys obrázku nerozuměl, ani nikdo jiný na letišti."
+  ]
+},
+{
+  q: "Co platí o šifře?",
+  options: [
+    "Má být tajná a rozumí jí jen ten, kdo zná klíč",
+    "Má co nejvíce lidem usnadnit přenos informace",
+    "Nepoužívá se v informatice"
+  ],
+  correct: 0,
+  feedback: [
+    "Přesně tak! Smysl šifry je utajení — bez klíče ji nerozluští ten, kdo k tomu nemá oprávnění.",
+    "To je spíš popis kódu. Šifra naopak informaci schovává, ne usnadňuje.",
+    "Šifry se v informatice běžně používají, například pro hesla nebo zabezpečenou komunikaci."
+  ]
+},
+{
+  q: "Policista vysílačkou nahlásí \"kód 10-4\". Ostatní řidiči to sice zaslechnou, ale nerozumí tomu jako on. O co jde?",
+  options: [
+    "O šifru, protože nikdo neví, co to znamená, a nikdy se to nikdo nedozví",
+    "O kód, protože usnadňuje rychlou komunikaci mezi policisty",
+    "O piktogram, protože jde o obrázkový symbol"
+  ],
+  correct: 1,
+  feedback: [
+    "Cílem není utajit informaci před světem, ale rychle a jasně komunikovat mezi kolegy — proto jde o kód.",
+    "Přesně tak! Policejní kódy nejsou tajné proto, aby nikdo nerozuměl, ale proto, aby komunikace byla rychlá a jednoznačná pro ty, kdo je znají.",
+    "Piktogram je obrázek, tohle je mluvené slovní spojení."
+  ]
+},
+{
+  q: "Ve staré knize najdeš vzkaz napsaný tak, že každé písmeno je posunuté o tři místa v abecedě (A→D, B→E...). O co jde?",
+  options: [
+    "O kód, protože to má usnadnit čtení",
+    "O šifru, protože bez znalosti posunu (klíče) text nerozluštíš",
+    "O piktogram, protože se dá přeložit obrázkem"
+  ],
+  correct: 1,
+  feedback: [
+    "Naopak — takový posun text nečiní čitelnějším, ale skrývá ho před tím, kdo nezná klíč.",
+    "Přesně tak! Posun o tři písmena (Caesarova šifra) je klasická šifra — potřebuješ znát klíč (posun), abys ji rozluštil/a.",
+    "Žádné obrázky tu nejsou, jde jen o přeuspořádaná písmena."
+  ]
+},
+{
+  q: "Čím se liší čárový kód od QR kódu?",
+  options: [
+    "Čárový kód nese víc informací než QR kód",
+    "QR kód se čte i svisle a pojme mnohem víc informací",
+    "Čárový kód umí zakódovat celou webovou adresu"
+  ],
+  correct: 1,
+  feedback: [
+    "Je to přesně naopak — QR kód pojme tisíckrát víc informací.",
+    "Ano! QR kód se čte vodorovně i svisle, a proto se do něj vejde třeba celá webová adresa nebo vizitka.",
+    "To dokáže právě QR kód, ne čárový kód, který nese jen krátké číslo."
+  ]
+},
+{
+  q: "Krabice se zbožím se při převozu trochu poškrábe a část čárového kódu je nečitelná. Co se stane, když ho chce prodavačka načíst?",
+  options: [
+    "Nenačte se vůbec, čárový kód nesnese žádné poškození",
+    "Většinou stále jde přečíst, pokud jsou čáry aspoň částečně rozeznatelné",
+    "Načte se, ale ukáže úplně jiný výrobek"
+  ],
+  correct: 1,
+  feedback: [
+    "Drobné poškození obvykle není fatální. Proto bývají čáry tak dlouhé.",
+    "Ano! Pokud jsou čáry aspoň z velké části viditelné a rozeznatelné, čtečka si s tím obvykle poradí.",
+    "Kód by se buď nenačetl, nebo načetl správně — nezmění se na jiný výrobek jen kvůli poškrábání."
+  ]
+},
+{
+  q: "Co je bit?",
+  options: [
+    "Nejmenší jednotka informace, nula nebo jednička",
+    "Jiný název pro byte",
+    "Jednotka, kterou se měří rychlost internetu"
+  ],
+  correct: 0,
+  feedback: [
+    "Přesně tak! Bit je jedna jediná 0 nebo 1 — základní stavební kámen digitální informace.",
+    "Byte je tvořen více bity (přesně osmi), takže to není totéž.",
+    "Rychlost internetu se sice někdy udává v bitech za sekundu, ale bit samotný je jednotka informace, ne rychlosti."
+  ]
+},
+{
+  q: "Kolik bitů tvoří jeden byte?",
+  options: ["4", "8", "10"],
+  correct: 1,
+  feedback: [
+    "Zkus si vzpomenout na kostku Lega z prezentace — kolik měla čudlíků?",
+    "Ano! Byte se skládá přesně z 8 bitů.",
+    "Byte má méně bitů, než si myslíš — zkus 8."
+  ]
+},
+{
+  q: "Proč počítač pracuje s nulami a jedničkami (dvojkovou soustavou)?",
+  options: [
+    "Protože elektronické obvody přirozeně rozlišují jen dva stavy – zapnuto a vypnuto",
+    "Protože to vymysleli v Americe, kde mají dvojkovou soustavu",
+    "Protože desítková soustava je pro elektroniku příliš pomalá"
+  ],
+  correct: 0,
+  feedback: [
+    "Přesně tak! Elektrický obvod je buď pod proudem (1), nebo bez proudu (0) — proto se dvojková soustava k počítačům skvěle hodí.",
+    "V Americe mají desítkovou soustavu stejně jako my. Je pravda, že používají i dvanáctkovou, ale ne dvojkovou — ta je pro lidi nesrozumitelná.",
+    "Není to otázka rychlosti, ale toho, že obvody rozlišují jen dva stavy."
+  ]
+},
+{
+  q: "Stahuješ si video, které má 5 MB. Kolik je to zhruba kB?",
+  options: ["50 kB", "500 kB", "5000 kB"],
+  correct: 2,
+  feedback: [
+    "To je moc málo — mezi MB a kB je násobek 1000.",
+    "Pořád málo — zkus to vynásobit ještě jednou desetkrát.",
+    "Přesně tak! 1 MB = 1000 kB, takže 5 MB = 5000 kB."
+  ]
+},
+{
+  q: "Rodiče ti koupí externí disk s kapacitou 2 TB. Kolik je to zhruba GB?",
+  options: ["200 GB", "2000 GB", "20 000 GB"],
+  correct: 1,
+  feedback: [
+    "To je málo — mezi TB a GB je násobek 1000.",
+    "Přesně tak! 1 TB = 1000 GB, takže 2 TB = 2000 GB.",
+    "To je moc — zkus to vydělit desetkrát."
+  ]
+},
+{
+  q: "Co je ASCII?",
+  options: [
+    "Program na tvorbu QR kódů",
+    "Seznam, kde má každé písmeno nebo znak přiřazené své vlastní číslo",
+    "Speciální druh šifry pro vojáky"
+  ],
+  correct: 1,
+  feedback: [
+    "ASCII nemá s QR kódy nic společného.",
+    "Ano! ASCII přiřazuje každému písmenu, číslici nebo znaménku jeho vlastní kód — podobně jako číslo na skříňce.",
+    "ASCII není šifra ani není určeno jen pro vojáky — používá se běžně ve výpočetní technice."
+  ]
+},
+{
+  q: "Ve videohře najdeš tajnou zprávu napsanou jen v číslech, kde každé číslo odpovídá jednomu písmenu abecedy. O co asi jde?",
+  options: [
+    "O emoji",
+    "O jednoduchý číselný kód nebo šifru s klíčem",
+    "O Braillovo písmo"
+  ],
+  correct: 1,
+  feedback: [
+    "Emoji je obrázkový symbol, tady jde o čísla nahrazující písmena.",
+    "Přesně tak! Bez znalosti toho, které číslo odpovídá kterému písmenu (klíč), zprávu nerozluštíš.",
+    "Braillovo písmo je založené na hmatových bodech, ne na číslech."
+  ]
+},
+{
+  q: "Braillovo písmo používají nevidomí lidé. Z čeho se skládá?",
+  options: [
+    "Z barevných čar",
+    "Z vyvýšených bodů, které tvoří vzory pro jednotlivá písmena",
+    "Z čísel psaných nahlas"
+  ],
+  correct: 1,
+  feedback: [
+    "Barva by nevidomému člověku nepomohla — Braillovo písmo se čte hmatem.",
+    "Ano! Kombinace vyvýšených bodů vytváří vzory, které představují jednotlivá písmena a znaky.",
+    "Braillovo písmo se čte prsty, ne poslechem."
+  ]
+},
+{
+  q: "Proč lékař v nemocnici používá u pacientů kódy (např. kód diagnózy)?",
+  options: [
+    "Aby to vypadalo odborně a tajemně",
+    "Aby šla informace rychle a jednoznačně zapsat a předat mezi zdravotníky",
+    "Lékaři žádné kódy nepoužívají"
+  ],
+  correct: 1,
+  feedback: [
+    "Cílem lékařů není flexit, ani něco tajit, ale rychlost a přesnost.",
+    "Přesně tak! Kód diagnózy umožní rychlé a jednoznačné předání informace mezi lékaři a zdravotnickým systémem.",
+    "Lékařské kódy (např. diagnóz) se v nemocnicích běžně používají."
+  ]
+},
+{
+  q: "Archivář ukládá staré dokumenty a každému přiřadí unikátní číslo. K čemu mu to hlavně slouží?",
+  options: [
+    "Aby dokumenty vypadaly důležitěji",
+    "Aby dokument šel rychle a přesně najít a identifikovat",
+    "Aby schoval obsah dokumentu před ostatními"
+  ],
+  correct: 1,
+  feedback: [
+    "Číslo nemá na starosti vzhled, ale praktickou organizaci.",
+    "Ano! Podobně jako čárový kód u zboží, číslo umožní rychle dokument najít a identifikovat mezi tisíci dalších.",
+    "Kdyby chtěl obsah schovat, použil by spíš šifru, ne systém číslování."
+  ]
+},
+{
+  q: "Zkuste při držení levého Alt napsat číslo 3, 4, 5 nebo 6. Zobrazí se karetní symbol (♦♣♠♥). Co to dokazuje?",
+  options: [
+    "Nic, Alt je jen klávesa z historie a už nic neumí",
+    "Každý znak má svůj kód, kterým ho počítač rozpozná a zobrazí",
+    "Alt je šifrovací klávesa a neměli bychom ji vůbec používat"
+  ],
+  correct: 1,
+  feedback: [
+    "Alt má konkrétní funkci — umožňuje psát další znaky, které mají také svůj vlastní kód.",
+    "Přesně tak! I karty mají v systému ASCII svůj vlastní kód, díky kterému je počítač umí zobrazit.",
+    "Alt slouží k psaní znaků, není to šifrovací nástroj."
+  ]
+}
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+const userAnswers = [];
+
+const card = document.getElementById('card');
+const progressBar = document.getElementById('progressBar');
+
+function renderQuestion() {
+  answered = false;
+  const item = questions[current];
+  progressBar.style.width = ((current) / questions.length * 100) + "%";
+
+  let html = `<div class="qcounter">Otázka ${current + 1} z ${questions.length}</div>`;
+  html += `<div class="question">${item.q}</div>`;
+  html += `<div class="options">`;
+  const letters = ['a', 'b', 'c'];
+  item.options.forEach((opt, i) => {
+    html += `<button class="option" data-idx="${i}" onclick="selectOption(${i})">
+      <span class="option-letter">${letters[i]}</span><span>${opt}</span>
+    </button>`;
+  });
+  html += `</div>`;
+  html += `<div class="feedback" id="feedback"></div>`;
+  html += `<div class="nav-row"><button class="next-btn" id="nextBtn" onclick="nextQuestion()">${current === questions.length - 1 ? 'Zobrazit výsledek' : 'Další otázka →'}</button></div>`;
+
+  card.innerHTML = html;
+}
+
+function selectOption(idx) {
+  if (answered) return;
+  answered = true;
+  const item = questions[current];
+  const options = document.querySelectorAll('.option');
+  options.forEach((opt, i) => {
+    opt.classList.add('disabled');
+    if (i === item.correct) opt.classList.add('correct');
+    else if (i === idx) opt.classList.add('incorrect');
+  });
+
+  const isCorrect = idx === item.correct;
+  if (isCorrect) score++;
+  userAnswers.push({ q: item.q, correct: isCorrect });
+
+  const fb = document.getElementById('feedback');
+  fb.classList.add('show');
+  fb.classList.add(isCorrect ? 'correct-fb' : 'incorrect-fb');
+  fb.innerHTML = `<strong>${isCorrect ? '✓ Správně!' : '✗ Nesprávně'}</strong>${item.feedback[idx]}`;
+
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+function nextQuestion() {
+  current++;
+  if (current < questions.length) {
+    renderQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  progressBar.style.width = "100%";
+  const pct = Math.round((score / questions.length) * 100);
+  let msg = "";
+  if (pct >= 90) msg = "Skvělá práce! Tématu kódování a šifrování rozumíš opravdu dobře.";
+  else if (pct >= 70) msg = "Pěkný výsledek! Většině pojmů rozumíš, pár věcí si ještě zopakuj.";
+  else if (pct >= 50) msg = "Dobrý základ, ale některé pojmy si ještě promysli a zkus otázky znovu.";
+  else msg = "Nevadí, tohle téma chce čas. Projdi si prezentaci znovu a zkus kvíz podruhé.";
+
+  let reviewHtml = '<div class="review-list">';
+  userAnswers.forEach((a, i) => {
+    reviewHtml += `<div class="review-item ${a.correct ? 'ok' : 'bad'}">
+      <div class="rq">${i + 1}. ${a.correct ? '✓' : '✗'} ${a.q}</div>
+    </div>`;
+  });
+  reviewHtml += '</div>';
+
+  card.innerHTML = `
+    <div class="result-screen">
+      <h2>Výsledek</h2>
+      <div class="score-circle">
+        <div class="num">${score}/${questions.length}</div>
+        <div class="denom">${pct}%</div>
+      </div>
+      <div class="result-msg">${msg}</div>
+      <button class="restart-btn" onclick="restart()">Zkusit znovu</button>
+      ${reviewHtml}
+    </div>
+  `;
+}
+
+function restart() {
+  current = 0;
+  score = 0;
+  userAnswers.length = 0;
+  renderQuestion();
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
