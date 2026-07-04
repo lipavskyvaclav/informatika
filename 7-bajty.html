@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hackerská akademie: Datové jednotky</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #0b0f19;
+            color: #e0e6ed;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: #151e2e;
+            border: 2px solid #00f3ff;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        h1 {
+            text-align: center;
+            color: #00f3ff;
+            font-size: 2rem;
+            margin: 0;
+            padding: 20px;
+            background: #0d131f;
+            border-bottom: 2px solid #00f3ff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        /* Navigace - Zálložky */
+        .tabs {
+            display: flex;
+            background: #1a2538;
+            border-bottom: 2px solid #30415d;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            background: none;
+            border: none;
+            color: #8899a6;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-btn:hover {
+            color: #fff;
+            background: #223047;
+        }
+        .tab-btn.active {
+            color: #00f3ff;
+            border-bottom-color: #00f3ff;
+            background: #151e2e;
+        }
+
+        /* Obsah zálložek */
+        .tab-content {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Modul 1: Vizualizace --- */
+        .viz-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .viz-row {
+            display: flex;
+            align-items: center;
+            background: #1e2a40;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid;
+        }
+        .viz-row[data-color="b"] { border-color: #a0aec0; }
+        .viz-row[data-color="kb"] { border-color: #48bb78; }
+        .viz-row[data-color="mb"] { border-color: #ecc94b; }
+        .viz-row[data-color="gb"] { border-color: #ed8936; }
+        .viz-row[data-color="tb"] { border-color: #e53e3e; }
+        
+        .viz-unit {
+            font-size: 1.8rem;
+            font-weight: bold;
+            width: 80px;
+            text-align: center;
+        }
+        .viz-desc {
+            flex: 1;
+            font-size: 1.2rem;
+            padding-left: 20px;
+        }
+        .viz-multiplier {
+            text-align: center;
+            color: #00f3ff;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin: -5px 0;
+        }
+
+        /* --- Modul 2: Terminál (Doplňování) --- */
+        .quiz-row {
+            background: #1e2a40;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            font-size: 1.3rem;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .quiz-equation {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 280px;
+        }
+        .quiz-input {
+            background: #0b0f19;
+            border: 2px solid #30415d;
+            color: #00f3ff;
+            font-size: 1.3rem;
+            font-weight: bold;
+            padding: 8px;
+            width: 80px;
+            text-align: center;
+            border-radius: 6px;
+            text-transform: uppercase;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .quiz-input:focus {
+            border-color: #00f3ff;
+            box-shadow: 0 0 8px rgba(0, 243, 255, 0.4);
+        }
+        .quiz-input.correct {
+            border-color: #48bb78;
+            background: rgba(72, 187, 120, 0.1);
+            color: #48bb78;
+        }
+        .quiz-input.wrong {
+            border-color: #e53e3e;
+            background: rgba(229, 62, 62, 0.1);
+            color: #e53e3e;
+        }
+        .status-icon {
+            font-size: 1.5rem;
+            width: 30px;
+            text-align: center;
+        }
+
+        /* --- Modul 3: Laboratoř (Drag & Drop) --- */
+        .lab-instructions {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: #8899a6;
+        }
+        .items-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+            min-height: 60px;
+        }
+        .drag-item {
+            background: #2d3748;
+            border: 2px solid #4a5568;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: grab;
+            font-weight: bold;
+            user-select: none;
+            transition: transform 0.1s, border-color 0.2s;
+        }
+        .drag-item:active { cursor: grabbing; transform: scale(0.95); }
+        .drag-item.selected {
+            border-color: #00f3ff;
+            background: #1a3644;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+        }
+        
+        .drop-zones {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 15px;
+        }
+        .drop-zone {
+            background: #1a2538;
+            border: 2px dashed #4a5568;
+            border-radius: 12px;
+            padding: 15px;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        .drop-zone.drag-over {
+            border-color: #00f3ff;
+            background: #1e314a;
+        }
+        .drop-zone.error {
+            border-color: #e53e3e;
+            animation: shake 0.4s;
+        }
+        .zone-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #a0aec0;
+            margin-bottom: 10px;
+            pointer-events: none;
+        }
+        /* Kdyz je polozka spravne umistena */
+        .drop-zone .drag-item {
+            margin-bottom: 8px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9rem;
+            padding: 8px;
+            border-color: #48bb78;
+            background: rgba(72, 187, 120, 0.1);
+            cursor: default;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.4rem; padding: 15px; }
+            .tab-btn { font-size: 0.9rem; padding: 12px 5px; }
+            .tab-content { padding: 15px; }
+            .viz-row { flex-direction: column; text-align: center; gap: 10px; }
+            .viz-desc { padding-left: 0; }
+            .quiz-row { justify-content: center; text-align: center; }
+            .drop-zones { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>💻 Datové centrum</h1>
+    
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab(event, 'tab-viz')">👁️ 1. Nákres</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-quiz')">⌨️ 2. Terminál</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-lab')">🧪 3. Laboratoř</button>
+    </div>
+
+    <!-- Modul 1: Vizualizace -->
+    <div id="tab-viz" class="tab-content active">
+        <p style="text-align:center; margin-top:0; color:#8899a6; font-size:1.1rem;">
+            Prohlédni si žebříček velikostí. Všimni si, že každá další jednotka je vždy přibližně <strong>tisíckrát větší</strong> než ta předchozí.
+        </p>
+        <div class="viz-container">
+            <div class="viz-row" data-color="b">
+                <div class="viz-unit" style="color: #a0aec0;">B</div>
+                <div class="viz-desc"><strong>Bajt:</strong> Jeden jediný znak (např. písmeno "A" nebo mezera).</div>
+            </div>
+            <div class="viz-multiplier">↓ × 1000 ↓</div>
+            <div class="viz-row" data-color="kb">
+                <div class="viz-unit" style="color: #48bb78;">kB</div>
+                <div class="viz-desc"><strong>Kilobajt:</strong> Kratší textový dokument, jednoduchý e-mail.</div>
+            </div>
+            <div class="viz-multiplier">↓ × 1000 ↓</div>
+            <div class="viz-row" data-color="mb">
+                <div class="viz-unit" style="color: #ecc94b;">MB</div>
+                <div class="viz-desc"><strong>Megabajt:</strong> Jedna fotka z mobilu, jedna písnička v MP3.</div>
+            </div>
+            <div class="viz-multiplier">↓ × 1000 ↓</div>
+            <div class="viz-row" data-color="gb">
+                <div class="viz-unit" style="color: #ed8936;">GB</div>
+                <div class="viz-desc"><strong>Gigabajt:</strong> Celý film, moderní počítačová hra.</div>
+            </div>
+            <div class="viz-multiplier">↓ × 1000 ↓</div>
+            <div class="viz-row" data-color="tb">
+                <div class="viz-unit" style="color: #e53e3e;">TB</div>
+                <div class="viz-desc"><strong>Terabajt:</strong> Obrovský externí disk z obchodu na tisíce filmů.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modul 2: Terminál -->
+    <div id="tab-quiz" class="tab-content">
+        <p style="text-align:center; margin-top:0; color:#8899a6; font-size:1.1rem;">
+            Doplň správnou zkratku jednotky (<strong>kB, MB, GB, TB</strong>). O číslo se nestarej, jen poznej, o jaký řád jde.
+        </p>
+        
+        <div class="quiz-row">
+            <div class="quiz-equation">3,4 MB = 3400</div>
+            <input type="text" class="quiz-input" data-answer="KB" maxlength="2" placeholder="??" oninput="checkQuiz(this)">
+            <div class="status-icon">⬜</div>
+        </div>
+        <div class="quiz-row">
+            <div class="quiz-equation">8 GB = 8000</div>
+            <input type="text" class="quiz-input" data-answer="MB" maxlength="2" placeholder="??" oninput="checkQuiz(this)">
+            <div class="status-icon">⬜</div>
+        </div>
+        <div class="quiz-row">
+            <div class="quiz-equation">5000 MB = 5</div>
+            <input type="text" class="quiz-input" data-answer="GB" maxlength="2" placeholder="??" oninput="checkQuiz(this)">
+            <div class="status-icon">⬜</div>
+        </div>
+        <div class="quiz-row">
+            <div class="quiz-equation">2,5 TB = 2500</div>
+            <input type="text" class="quiz-input" data-answer="GB" maxlength="2" placeholder="??" oninput="checkQuiz(this)">
+            <div class="status-icon">⬜</div>
+        </div>
+        <div class="quiz-row">
+            <div class="quiz-equation">7500 B = 7,5</div>
+            <input type="text" class="quiz-input" data-answer="KB" maxlength="2" placeholder="??" oninput="checkQuiz(this)">
+            <div class="status-icon">⬜</div>
+        </div>
+    </div>
+
+    <!-- Modul 3: Laboratoř -->
+    <div id="tab-lab" class="tab-content">
+        <div class="lab-instructions">
+            <strong>Roztřiď data do správných šuplíků!</strong><br>
+            Přetáhni položku myší, nebo na mobilech: <em>nejprve ťukni na položku a pak ťukni na správný kontejner.</em>
+        </div>
+
+        <div class="items-pool" id="pool">
+            <div class="drag-item" draggable="true" data-target="KB">Krátký e-mail bez obrázků</div>
+            <div class="drag-item" draggable="true" data-target="MB">Jedna fotka z dovolené</div>
+            <div class="drag-item" draggable="true" data-target="MB">Tříminutová MP3 písnička</div>
+            <div class="drag-item" draggable="true" data-target="GB">Film v HD rozlišení</div>
+            <div class="drag-item" draggable="true" data-target="TB">Největší paměťová karta v obchodě</div>
+            <div class="drag-item" draggable="true" data-target="GB">Graficky náročná 3D hra</div>
+        </div>
+
+        <div class="drop-zones">
+            <div class="drop-zone" data-unit="KB">
+                <div class="zone-title" style="color: #48bb78;">kB</div>
+            </div>
+            <div class="drop-zone" data-unit="MB">
+                <div class="zone-title" style="color: #ecc94b;">MB</div>
+            </div>
+            <div class="drop-zone" data-unit="GB">
+                <div class="zone-title" style="color: #ed8936;">GB</div>
+            </div>
+            <div class="drop-zone" data-unit="TB">
+                <div class="zone-title" style="color: #e53e3e;">TB</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Navigace ---
+    function openTab(evt, tabName) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+    }
+
+    // --- Kvíz ---
+    function checkQuiz(input) {
+        const answer = input.value.trim().toUpperCase();
+        const correctAnswer = input.dataset.answer;
+        const icon = input.nextElementSibling;
+
+        if (answer.length === 0) {
+            input.classList.remove('correct', 'wrong');
+            icon.innerText = '⬜';
+        } else if (answer === correctAnswer) {
+            input.classList.remove('wrong');
+            input.classList.add('correct');
+            icon.innerText = '✅';
+        } else if (answer.length === 2) {
+            input.classList.remove('correct');
+            input.classList.add('wrong');
+            icon.innerText = '❌';
+        } else {
+            input.classList.remove('correct', 'wrong');
+            icon.innerText = '⏳';
+        }
+    }
+
+    // --- Drag & Drop (s podporou pro dotyky) ---
+    let selectedItem = null;
+
+    document.querySelectorAll('.drag-item').forEach(item => {
+        // Desktop drag
+        item.addEventListener('dragstart', (e) => {
+            selectedItem = item;
+            item.style.opacity = '0.5';
+        });
+        item.addEventListener('dragend', () => {
+            item.style.opacity = '1';
+            selectedItem = null;
+        });
+
+        // Mobilní "Tap to select"
+        item.addEventListener('click', (e) => {
+            // Lze klikat jen na nezarazene
+            if (item.parentElement.id === 'pool') {
+                if(selectedItem) selectedItem.classList.remove('selected');
+                selectedItem = item;
+                item.classList.add('selected');
+            }
+        });
+    });
+
+    document.querySelectorAll('.drop-zone').forEach(zone => {
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            zone.classList.add('drag-over');
+        });
+        zone.addEventListener('dragleave', () => {
+            zone.classList.remove('drag-over');
+        });
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            zone.classList.remove('drag-over');
+            if(selectedItem) processDrop(zone, selectedItem);
+        });
+
+        // Mobilní "Tap to drop"
+        zone.addEventListener('click', () => {
+            if(selectedItem) processDrop(zone, selectedItem);
+        });
+    });
+
+    function processDrop(zone, item) {
+        const targetUnit = item.dataset.target;
+        const zoneUnit = zone.dataset.unit;
+
+        if (targetUnit === zoneUnit) {
+            zone.appendChild(item);
+            item.classList.remove('selected');
+            item.draggable = false;
+            selectedItem = null;
+        } else {
+            // Chyba - zatreseni
+            zone.classList.add('error');
+            setTimeout(() => zone.classList.remove('error'), 400);
+        }
+    }
+</script>
+</body>
+</html>
