@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kreslíme mnohoúhelníky se Scratchem</title>
+<style>
+  :root{
+    --scratch-orange:#FF8C1A;
+    --scratch-orange-dark:#E67300;
+    --scratch-blue:#4C97FF;
+    --scratch-blue-dark:#3373CC;
+    --scratch-green:#59C059;
+    --scratch-green-dark:#389438;
+    --ink:#2b2b2b;
+    --paper:#FBF8F2;
+    --panel:#ffffff;
+    --line:#e4ddce;
+    --shadow: 0 4px 14px rgba(0,0,0,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI', Verdana, sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    padding:0 0 40px 0;
+  }
+  header{
+    background:linear-gradient(135deg,var(--scratch-orange) 0%, var(--scratch-blue) 100%);
+    color:white;
+    padding:28px 16px 34px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  header h1{
+    margin:0 0 6px;
+    font-size:clamp(1.4rem,4vw,2.1rem);
+    letter-spacing:0.3px;
+  }
+  header p{
+    margin:0;
+    font-size:clamp(0.85rem,2.5vw,1rem);
+    opacity:0.95;
+  }
+  .cat-ear{
+    position:absolute;
+    width:120px;height:120px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.08);
+  }
+  .cat-ear.left{top:-60px; left:-40px;}
+  .cat-ear.right{bottom:-60px; right:-30px;}
+
+  main{
+    max-width:1000px;
+    margin:0 auto;
+    padding:24px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:24px;
+  }
+
+  section{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:16px;
+    box-shadow:var(--shadow);
+    padding:20px clamp(16px,4vw,28px);
+  }
+
+  h2{
+    margin-top:0;
+    font-size:1.25rem;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  h2 .dot{
+    width:12px;height:12px;border-radius:50%;
+    display:inline-block;
+  }
+  .dot-orange{background:var(--scratch-orange);}
+  .dot-blue{background:var(--scratch-blue);}
+  .dot-green{background:var(--scratch-green);}
+
+  /* --- SIMULATOR --- */
+  .sim-layout{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap:20px;
+  }
+  @media (min-width:760px){
+    .sim-layout{grid-template-columns: 1fr 320px;}
+  }
+
+  .canvas-wrap{
+    background:#ffffff;
+    border:2px dashed var(--line);
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    aspect-ratio:1/1;
+    max-height:460px;
+  }
+  canvas{
+    width:100%;
+    height:100%;
+    display:block;
+    border-radius:12px;
+  }
+
+  .controls{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+
+  .slider-box{
+    background:#F4F7FF;
+    border-radius:12px;
+    padding:16px;
+    border:1px solid #dbe6ff;
+  }
+  .slider-box label{
+    font-weight:600;
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:8px;
+    font-size:0.95rem;
+  }
+  .slider-box .val{
+    background:var(--scratch-blue);
+    color:white;
+    border-radius:8px;
+    padding:2px 10px;
+    font-weight:700;
+  }
+  input[type=range]{
+    width:100%;
+    accent-color:var(--scratch-blue);
+    height:6px;
+  }
+
+  .scratch-blocks{
+    display:flex;
+    flex-direction:column;
+    gap:0;
+    font-size:0.95rem;
+    font-weight:600;
+    user-select:none;
+  }
+  .block{
+    color:white;
+    padding:10px 14px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex-wrap:wrap;
+  }
+  .block-repeat{
+    background:var(--scratch-orange);
+    border-radius:10px 10px 0 0;
+    padding-bottom:6px;
+  }
+  .block-inner-wrap{
+    background:var(--scratch-orange);
+    padding:0 0 10px 18px;
+    border-radius:0 0 10px 10px;
+  }
+  .block-move{
+    background:var(--scratch-blue);
+    border-radius:8px;
+    margin-bottom:6px;
+  }
+  .block-turn{
+    background:var(--scratch-blue);
+    border-radius:8px;
+  }
+  .pill{
+    background:white;
+    color:var(--ink);
+    border-radius:14px;
+    padding:2px 10px;
+    font-weight:700;
+    min-width:24px;
+    text-align:center;
+  }
+  .pill.live{
+    background:#fff6da;
+    box-shadow:0 0 0 2px var(--scratch-green) inset;
+  }
+
+  .btn-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  button{
+    cursor:pointer;
+    border:none;
+    border-radius:10px;
+    padding:10px 16px;
+    font-weight:700;
+    font-size:0.95rem;
+    color:white;
+    transition:transform 0.1s ease, filter 0.15s ease;
+  }
+  button:active{transform:scale(0.97);}
+  .btn-draw{background:var(--scratch-green);}
+  .btn-draw:hover{filter:brightness(1.06);}
+  .btn-reset{background:#B0B0B0;}
+  .btn-reset:hover{filter:brightness(1.06);}
+
+  .info-line{
+    background:#FFF8E8;
+    border:1px solid #f3e2ad;
+    border-radius:10px;
+    padding:10px 14px;
+    font-size:0.95rem;
+    line-height:1.5;
+  }
+  .info-line b{color:var(--scratch-orange-dark);}
+
+  /* --- EXPLANATION --- */
+  .explain-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:16px;
+  }
+  @media (min-width:700px){
+    .explain-grid{grid-template-columns:1fr 1fr;}
+  }
+  .explain-card{
+    background:#F7F9FC;
+    border-radius:12px;
+    padding:16px 18px;
+    border:1px solid #e2e8f4;
+  }
+  .formula{
+    font-size:1.3rem;
+    text-align:center;
+    background:white;
+    border-radius:10px;
+    padding:14px;
+    margin:12px 0;
+    border:2px solid var(--scratch-blue);
+    font-weight:800;
+    color:var(--scratch-blue-dark);
+  }
+  table.shape-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:0.92rem;
+  }
+  table.shape-table th, table.shape-table td{
+    border:1px solid var(--line);
+    padding:6px 8px;
+    text-align:center;
+  }
+  table.shape-table th{
+    background:var(--scratch-blue);
+    color:white;
+  }
+  table.shape-table tr:nth-child(even){background:#f4f7fc;}
+
+  /* --- CALCULATOR --- */
+  .calc-wrap{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:16px;
+  }
+  .calc-body{
+    background:#222;
+    border-radius:16px;
+    padding:16px;
+    width:100%;
+    max-width:320px;
+    box-shadow:var(--shadow);
+  }
+  .calc-screen{
+    background:#dff0d8;
+    color:#1c3d1c;
+    border-radius:10px;
+    padding:14px;
+    font-size:1.6rem;
+    text-align:right;
+    font-family:'Consolas', monospace;
+    margin-bottom:12px;
+    min-height:34px;
+    word-break:break-all;
+  }
+  .calc-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+  }
+  .calc-grid button{
+    background:#3a3a3a;
+    padding:14px 0;
+    font-size:1.1rem;
+    border-radius:8px;
+  }
+  .calc-grid button.op{background:var(--scratch-orange);}
+  .calc-grid button.eq{background:var(--scratch-green); grid-column:span 2;}
+  .calc-grid button.clear{background:#c94c4c;}
+  .calc-grid button:hover{filter:brightness(1.15);}
+
+  .practice-box{
+    background:#F7F9FC;
+    border:1px solid #e2e8f4;
+    border-radius:12px;
+    padding:16px 18px;
+    width:100%;
+    max-width:420px;
+    text-align:center;
+  }
+  .practice-box .task{
+    font-size:1.15rem;
+    font-weight:700;
+    margin-bottom:10px;
+  }
+  .practice-box input{
+    width:90px;
+    padding:8px;
+    font-size:1.1rem;
+    text-align:center;
+    border-radius:8px;
+    border:2px solid var(--scratch-blue);
+    margin-right:8px;
+  }
+  .practice-box button{
+    background:var(--scratch-green);
+  }
+  .feedback{
+    margin-top:10px;
+    font-weight:700;
+    min-height:22px;
+  }
+  .feedback.ok{color:var(--scratch-green-dark);}
+  .feedback.bad{color:#c94c4c;}
+
+  footer{
+    text-align:center;
+    color:#888;
+    font-size:0.8rem;
+    margin-top:10px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="cat-ear left"></div>
+  <div class="cat-ear right"></div>
+  <h1>🔺 Kreslíme mnohoúhelníky se Scratchem 🔷</h1>
+  <p>Posuvník, vysvětlení a malá kalkulačka k příkazům <b>opakuj</b> a <b>otoč se o...</b></p>
+</header>
+
+<main>
+
+  <!-- SIMULATOR -->
+  <section>
+    <h2><span class="dot dot-blue"></span>Simulátor: nastav si počet úhlů</h2>
+
+    <div class="sim-layout">
+      <div class="canvas-wrap">
+        <canvas id="canvas" width="500" height="500"></canvas>
+      </div>
+
+      <div class="controls">
+        <div class="slider-box">
+          <label>Počet úhlů (n) <span class="val" id="nValue">4</span></label>
+          <input type="range" id="nSlider" min="3" max="12" value="4" step="1">
+        </div>
+
+        <div class="scratch-blocks">
+          <div class="block block-repeat">
+            opakuj <span class="pill" id="repeatPill">4</span> krát
+          </div>
+          <div class="block-inner-wrap">
+            <div class="block block-move">
+              dopředu o <span class="pill">50</span> kroků
+            </div>
+            <div class="block block-turn">
+              otoč se ↻ o <span class="pill live" id="anglePill">90</span> stupňů
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-draw" id="drawBtn">▶ Nakresli</button>
+          <button class="btn-reset" id="resetBtn">⟲ Smazat</button>
+        </div>
+
+        <div class="info-line">
+          Aby se pero vrátilo přesně tam, kde začalo, musí se za celou jízdu otočit o <b>celých 360°</b>.
+          Proto se úhel otočení počítá jako <b>360 ÷ n</b>.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPLANATION -->
+  <section>
+    <h2><span class="dot dot-orange"></span>Jak spolu souvisí „opakuj“ a „otoč se o…“</h2>
+
+    <div class="explain-grid">
+      <div class="explain-card">
+        <p>Když robot (pero) kreslí mnohoúhelník, musí na konci udělat <b>jednu celou otočku</b> — tedy 360°.
+        Tuto otočku rozdělí rovnoměrně mezi všechny strany, které nakreslí.</p>
+        <p>Proto platí jednoduché pravidlo:</p>
+        <div class="formula">úhel otočení = 360° ÷ n</div>
+        <p>kde <b>n</b> je počet stran (a zároveň počet úhlů) mnohoúhelníku — je to stejné číslo, které je v bloku
+        <b>„opakuj n krát“</b>.</p>
+      </div>
+
+      <div class="explain-card">
+        <p><b>Příklady pro různá n:</b></p>
+        <table class="shape-table">
+          <tr><th>n (úhlů)</th><th>Tvar</th><th>360 ÷ n</th></tr>
+          <tr><td>3</td><td>trojúhelník</td><td>120°</td></tr>
+          <tr><td>4</td><td>čtverec</td><td>90°</td></tr>
+          <tr><td>5</td><td>pětiúhelník</td><td>72°</td></tr>
+          <tr><td>6</td><td>šestiúhelník</td><td>60°</td></tr>
+          <tr><td>8</td><td>osmiúhelník</td><td>45°</td></tr>
+          <tr><td>12</td><td>dvanáctiúhelník</td><td>30°</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- CALCULATOR -->
+  <section>
+    <h2><span class="dot dot-green"></span>Procvič si výpočet: kalkulačka a příklady</h2>
+
+    <div class="calc-wrap">
+      <div class="calc-body">
+        <div class="calc-screen" id="calcScreen">0</div>
+        <div class="calc-grid">
+          <button class="clear" onclick="calcClear()">C</button>
+          <button onclick="calcInput('(')">(</button>
+          <button onclick="calcInput(')')">)</button>
+          <button class="op" onclick="calcInput('/')">÷</button>
+
+          <button onclick="calcInput('7')">7</button>
+          <button onclick="calcInput('8')">8</button>
+          <button onclick="calcInput('9')">9</button>
+          <button class="op" onclick="calcInput('*')">×</button>
+
+          <button onclick="calcInput('4')">4</button>
+          <button onclick="calcInput('5')">5</button>
+          <button onclick="calcInput('6')">6</button>
+          <button class="op" onclick="calcInput('-')">−</button>
+
+          <button onclick="calcInput('1')">1</button>
+          <button onclick="calcInput('2')">2</button>
+          <button onclick="calcInput('3')">3</button>
+          <button class="op" onclick="calcInput('+')">+</button>
+
+          <button onclick="calcBackspace()">⌫</button>
+          <button onclick="calcInput('0')">0</button>
+          <button class="eq" onclick="calcEquals()">=</button>
+        </div>
+      </div>
+
+      <div class="practice-box">
+        <div class="task" id="practiceTask">Kolik stupňů se otočí pero u mnohoúhelníku s <b>n = 9</b> úhly?</div>
+        <input type="number" id="practiceInput" placeholder="?">
+        <button onclick="checkPractice()">Zkontrolovat</button>
+        <div class="feedback" id="practiceFeedback"></div>
+        <div style="margin-top:10px;">
+          <button class="btn-reset" style="background:#8ba6d9;" onclick="newPractice()">🔄 Nový příklad</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>Vytvořeno pro výuku programování a geometrie · Scratch bloky jsou pouze ilustrační</footer>
+</main>
+
+<script>
+  // ---------- SIMULATOR ----------
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const nSlider = document.getElementById('nSlider');
+  const nValue = document.getElementById('nValue');
+  const repeatPill = document.getElementById('repeatPill');
+  const anglePill = document.getElementById('anglePill');
+  const drawBtn = document.getElementById('drawBtn');
+  const resetBtn = document.getElementById('resetBtn');
+
+  let animId = null;
+
+  function updatePills(){
+    const n = parseInt(nSlider.value);
+    nValue.textContent = n;
+    repeatPill.textContent = n;
+    anglePill.textContent = round1(360/n);
+  }
+
+  function round1(x){
+    return Math.round(x*10)/10;
+  }
+
+  function clearCanvas(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+
+  function drawStaticPolygon(n){
+    // draw instantly (used when just moving slider)
+    clearCanvas();
+    const angleStep = 360/n;
+    const sideLen = 500 / Math.max(3.2, n*0.55); // scale so it fits
+    let x = canvas.width/2;
+    let y = canvas.height/2;
+    // compute bounding to center: first simulate path
+    let heading = -90; // pointing up like Scratch
+    let points = [{x,y}];
+    for(let i=0;i<n;i++){
+      const rad = heading * Math.PI/180;
+      x += sideLen*Math.cos(rad);
+      y += sideLen*Math.sin(rad);
+      points.push({x,y});
+      heading += angleStep;
+    }
+    // find bounding box, recenter
+    const xs = points.map(p=>p.x), ys = points.map(p=>p.y);
+    const minX=Math.min(...xs), maxX=Math.max(...xs);
+    const minY=Math.min(...ys), maxY=Math.max(...ys);
+    const cx = (minX+maxX)/2, cy=(minY+maxY)/2;
+    const offX = canvas.width/2 - cx;
+    const offY = canvas.height/2 - cy;
+
+    ctx.strokeStyle = '#4C97FF';
+    ctx.lineWidth = 4;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    points.forEach((p,i)=>{
+      const px = p.x+offX, py=p.y+offY;
+      if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+    });
+    ctx.stroke();
+
+    // draw dot at start
+    ctx.fillStyle = '#59C059';
+    ctx.beginPath();
+    ctx.arc(points[0].x+offX, points[0].y+offY, 6,0,2*Math.PI);
+    ctx.fill();
+  }
+
+  function animatePolygon(n){
+    if(animId) cancelAnimationFrame(animId);
+    clearCanvas();
+    const angleStep = 360/n;
+    const sideLen = 500 / Math.max(3.2, n*0.55);
+    let heading = -90;
+    let x = canvas.width/2;
+    let y = canvas.height/2;
+    let points = [{x,y}];
+    for(let i=0;i<n;i++){
+      const rad = heading * Math.PI/180;
+      x += sideLen*Math.cos(rad);
+      y += sideLen*Math.sin(rad);
+      points.push({x,y});
+      heading += angleStep;
+    }
+    const xs = points.map(p=>p.x), ys = points.map(p=>p.y);
+    const minX=Math.min(...xs), maxX=Math.max(...xs);
+    const minY=Math.min(...ys), maxY=Math.max(...ys);
+    const cx=(minX+maxX)/2, cy=(minY+maxY)/2;
+    const offX = canvas.width/2-cx, offY = canvas.height/2-cy;
+    const finalPoints = points.map(p=>({x:p.x+offX,y:p.y+offY}));
+
+    let step = 0;
+    const totalSteps = n;
+    const framesPerStep = 20;
+    let frame = 0;
+
+    function drawFrame(){
+      clearCanvas();
+      ctx.strokeStyle = '#4C97FF';
+      ctx.lineWidth = 4;
+      ctx.lineJoin='round';
+      ctx.beginPath();
+      ctx.moveTo(finalPoints[0].x, finalPoints[0].y);
+      for(let i=1;i<=step;i++){
+        ctx.lineTo(finalPoints[i].x, finalPoints[i].y);
+      }
+      // partial current segment
+      if(step<totalSteps){
+        const p0 = finalPoints[step];
+        const p1 = finalPoints[step+1];
+        const t = frame/framesPerStep;
+        const px = p0.x + (p1.x-p0.x)*t;
+        const py = p0.y + (p1.y-p0.y)*t;
+        ctx.lineTo(px,py);
+      }
+      ctx.stroke();
+
+      ctx.fillStyle = '#59C059';
+      ctx.beginPath();
+      ctx.arc(finalPoints[0].x, finalPoints[0].y, 6,0,2*Math.PI);
+      ctx.fill();
+
+      frame++;
+      if(frame>framesPerStep){
+        frame=0;
+        step++;
+      }
+      if(step<totalSteps){
+        animId = requestAnimationFrame(drawFrame);
+      }
+    }
+    drawFrame();
+  }
+
+  nSlider.addEventListener('input', ()=>{
+    updatePills();
+    drawStaticPolygon(parseInt(nSlider.value));
+  });
+
+  drawBtn.addEventListener('click', ()=>{
+    animatePolygon(parseInt(nSlider.value));
+  });
+
+  resetBtn.addEventListener('click', ()=>{
+    if(animId) cancelAnimationFrame(animId);
+    clearCanvas();
+  });
+
+  updatePills();
+  drawStaticPolygon(4);
+
+  // ---------- CALCULATOR ----------
+  let calcExpr = '';
+  const calcScreen = document.getElementById('calcScreen');
+
+  function calcInput(v){
+    calcExpr += v;
+    calcScreen.textContent = calcExpr;
+  }
+  function calcClear(){
+    calcExpr = '';
+    calcScreen.textContent = '0';
+  }
+  function calcBackspace(){
+    calcExpr = calcExpr.slice(0,-1);
+    calcScreen.textContent = calcExpr || '0';
+  }
+  function calcEquals(){
+    try{
+      // only allow digits, operators, parentheses, dot
+      if(!/^[0-9+\-*/().\s]*$/.test(calcExpr)) throw new Error('invalid');
+      const result = Function('"use strict";return (' + calcExpr + ')')();
+      calcScreen.textContent = Number.isFinite(result) ? round1(result) : 'Chyba';
+      calcExpr = String(Number.isFinite(result) ? round1(result) : '');
+    }catch(e){
+      calcScreen.textContent = 'Chyba';
+      calcExpr = '';
+    }
+  }
+
+  // ---------- PRACTICE ----------
+  let currentN = 9;
+  const practiceTask = document.getElementById('practiceTask');
+  const practiceInput = document.getElementById('practiceInput');
+  const practiceFeedback = document.getElementById('practiceFeedback');
+
+  function newPractice(){
+    const options = [3,4,5,6,7,8,9,10,11,12];
+    currentN = options[Math.floor(Math.random()*options.length)];
+    practiceTask.innerHTML = `Kolik stupňů se otočí pero u mnohoúhelníku s <b>n = ${currentN}</b> úhly?`;
+    practiceInput.value = '';
+    practiceFeedback.textContent = '';
+    practiceFeedback.className = 'feedback';
+  }
+
+  function checkPractice(){
+    const answer = parseFloat(practiceInput.value);
+    const correct = round1(360/currentN);
+    if(Math.abs(answer-correct) < 0.15){
+      practiceFeedback.textContent = '✅ Správně! 360 ÷ ' + currentN + ' = ' + correct + '°';
+      practiceFeedback.className = 'feedback ok';
+    } else {
+      practiceFeedback.textContent = '❌ Zkus to znovu. Nápověda: 360 ÷ ' + currentN + ' = ?';
+      practiceFeedback.className = 'feedback bad';
+    }
+  }
+
+  newPractice();
+
+  // Enter key support for practice input
+  practiceInput.addEventListener('keypress', (e)=>{
+    if(e.key === 'Enter') checkPractice();
+  });
+</script>
+
+</body>
+</html>
