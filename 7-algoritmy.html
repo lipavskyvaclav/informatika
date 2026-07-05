@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Algoritmy v akci</title>
+<style>
+  :root{
+    --bg:#f4f1ea;
+    --card:#ffffff;
+    --ink:#2b2b2b;
+    --accent:#2f6f4f;
+    --accent2:#b5533c;
+    --muted:#8a8578;
+    --border:#d8d2c4;
+    --wrong:#c0392b;
+    --right:#2f6f4f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Segoe UI",Verdana,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    padding:0 0 40px 0;
+  }
+  header{
+    background:var(--ink);
+    color:#fff;
+    padding:18px 16px 14px;
+    text-align:center;
+  }
+  header h1{
+    margin:0 0 4px 0;
+    font-size:1.5rem;
+    letter-spacing:0.5px;
+  }
+  header p{
+    margin:0;
+    font-size:0.9rem;
+    color:#cfcfcf;
+  }
+  nav.tabs{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:center;
+    padding:16px 10px 0;
+    max-width:900px;
+    margin:0 auto;
+  }
+  nav.tabs button{
+    flex:1 1 140px;
+    max-width:180px;
+    background:var(--card);
+    border:2px solid var(--border);
+    border-radius:10px;
+    padding:10px 6px;
+    font-size:0.85rem;
+    font-weight:600;
+    color:var(--ink);
+    cursor:pointer;
+    transition:all 0.15s ease;
+  }
+  nav.tabs button:hover{
+    border-color:var(--accent);
+  }
+  nav.tabs button.active{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#fff;
+  }
+  nav.tabs button.done::after{
+    content:" ✓";
+  }
+  main{
+    max-width:800px;
+    margin:20px auto;
+    padding:0 14px;
+  }
+  section.task{
+    display:none;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:20px;
+  }
+  section.task.active{
+    display:block;
+  }
+  .task-title{
+    font-size:1.3rem;
+    margin:0 0 6px 0;
+    color:var(--accent2);
+  }
+  .task-instr{
+    font-size:0.95rem;
+    color:#4a4638;
+    margin:0 0 18px 0;
+    line-height:1.4;
+  }
+  .zone-label{
+    font-size:0.78rem;
+    text-transform:uppercase;
+    letter-spacing:0.6px;
+    color:var(--muted);
+    margin:14px 0 6px 2px;
+  }
+  .pool, .answer{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    min-height:56px;
+    padding:10px;
+    border-radius:10px;
+    border:2px dashed var(--border);
+  }
+  .answer{
+    border-style:solid;
+    background:#faf9f5;
+  }
+  .card{
+    background:#fffef9;
+    border:2px solid var(--border);
+    border-radius:10px;
+    padding:10px 12px;
+    font-size:0.9rem;
+    cursor:pointer;
+    user-select:none;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    line-height:1.3;
+    transition:transform 0.1s ease, border-color 0.15s ease;
+    max-width:100%;
+  }
+  .card:hover{
+    border-color:var(--accent);
+  }
+  .card.placed{
+    border-color:var(--accent);
+    background:#eef5ef;
+  }
+  .card .badge{
+    background:var(--accent);
+    color:#fff;
+    font-weight:700;
+    font-size:0.75rem;
+    border-radius:50%;
+    width:20px;
+    height:20px;
+    min-width:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .card input[type=number]{
+    width:56px;
+    padding:3px 4px;
+    font-size:0.9rem;
+    border:1px solid var(--border);
+    border-radius:6px;
+    text-align:center;
+  }
+  .card .unit{
+    color:var(--muted);
+    font-size:0.85rem;
+  }
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:18px;
+  }
+  .controls button{
+    padding:10px 18px;
+    border-radius:8px;
+    border:none;
+    font-size:0.9rem;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .btn-check{
+    background:var(--accent);
+    color:#fff;
+  }
+  .btn-reset{
+    background:#efe9dc;
+    color:var(--ink);
+    border:1px solid var(--border) !important;
+  }
+  .feedback{
+    margin-top:16px;
+    padding:12px 14px;
+    border-radius:8px;
+    font-size:0.92rem;
+    display:none;
+    line-height:1.4;
+  }
+  .feedback.ok{
+    display:block;
+    background:#e4f1e8;
+    border:1px solid var(--right);
+    color:#1f4a33;
+  }
+  .feedback.bad{
+    display:block;
+    background:#fbe9e6;
+    border:1px solid var(--wrong);
+    color:#7d2a1e;
+  }
+  .empty-hint{
+    color:var(--muted);
+    font-size:0.85rem;
+    padding:6px;
+  }
+  @media (max-width:480px){
+    header h1{font-size:1.2rem;}
+    .task-title{font-size:1.1rem;}
+    nav.tabs button{font-size:0.78rem;padding:8px 4px;}
+    .card{font-size:0.85rem;padding:8px 10px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🤖 Algoritmy v akci</h1>
+  <p>Poskládej příkazy ve správném pořadí a doplň chybějící čísla</p>
+</header>
+
+<nav class="tabs" id="tabs"></nav>
+
+<main id="tasksContainer"></main>
+
+<script>
+const TASKS = [
+  {
+    id: 1,
+    icon: "🚦",
+    tabLabel: "1. Křižovatka",
+    title: "Přecházení silnice",
+    instr: "Robot chce bezpečně přejít silnici na přechodu bez semaforu. Poskládej kroky ve správném pořadí a doplň chybějící číslo.",
+    steps: [
+      {id:"a", label:"Zastav se na okraji chodníku"},
+      {id:"b", label:"Podívej se doleva"},
+      {id:"c", label:"Podívej se doprava"},
+      {id:"d", label:"Podívej se ještě jednou doleva"},
+      {id:"e", label:"Pokud je volno, přejdi silnici za", hasInput:true, min:4, max:15, unit:"kroků"}
+    ],
+    order: ["a","b","c","d","e"],
+    note: "Kdybys kroky prohodil (třeba přešel silnici hned na začátku), robot by mohl skončit pod autem. Pořadí tu opravdu záleží!"
+  },
+  {
+    id: 2,
+    icon: "🔨",
+    tabLabel: "2. Hřebík",
+    title: "Zatloukání hřebíku",
+    instr: "Robot má zatlouct hřebík do prkna. Poskládej postup správně a doplň, kolikrát má udeřit kladivem.",
+    steps: [
+      {id:"a", label:"Vezmi kladivo do ruky"},
+      {id:"b", label:"Přilož hřebík kolmo na dřevo"},
+      {id:"c", label:"Přidrž hřebík prsty (opatrně!)"},
+      {id:"d", label:"Udeř kladivem", hasInput:true, min:3, max:15, unit:"krát"},
+      {id:"e", label:"Zkontroluj, jestli hřebík drží pevně"}
+    ],
+    order: ["a","b","c","d","e"],
+    note: "Kdyby robot udeřil kladivem dřív, než přiloží hřebík, nic by se nezatloukalo. Každý krok musí navazovat na ten předchozí."
+  },
+  {
+    id: 3,
+    icon: "🥚",
+    tabLabel: "3. Vejce",
+    title: "Vaření vejce natvrdo",
+    instr: "Robot chce uvařit vejce natvrdo. Poskládej postup a doplň potřebná čísla (množství vody a čas vaření).",
+    steps: [
+      {id:"a", label:"Nalij do hrnce", hasInput:true, min:300, max:1000, unit:"ml vody"},
+      {id:"b", label:"Vlož vejce do hrnce"},
+      {id:"c", label:"Zapni sporák a přiveď vodu k varu"},
+      {id:"d", label:"Vař vejce", hasInput:true, min:8, max:12, unit:"minut"},
+      {id:"e", label:"Vyndej vejce a nech vychladnout"}
+    ],
+    order: ["a","b","c","d","e"],
+    note: "Kdyby robot vařil vejce jen 1 minutu, bylo by skoro syrové. Přesný počet minut je tu klíčový parametr algoritmu."
+  },
+];
+
+const state = {};
+TASKS.forEach(t => state[t.id] = { placed: [], solved:false });
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function buildCardEl(task, step){
+  const div = document.createElement("div");
+  div.className = "card";
+  div.dataset.id = step.id;
+
+  const span = document.createElement("span");
+  span.textContent = step.label;
+  div.appendChild(span);
+
+  if(step.hasInput){
+    const input = document.createElement("input");
+    input.type = "number";
+    input.placeholder = "?";
+    input.addEventListener("click", e => e.stopPropagation());
+    input.addEventListener("focus", e => e.stopPropagation());
+    div.appendChild(input);
+
+    const unit = document.createElement("span");
+    unit.className = "unit";
+    unit.textContent = step.unit;
+    div.appendChild(unit);
+  }
+
+  div.addEventListener("click", () => toggleCard(task, step.id));
+  return div;
+}
+
+function renderTask(task){
+  const container = document.getElementById("task-" + task.id);
+  const poolEl = container.querySelector(".pool");
+  const answerEl = container.querySelector(".answer");
+  const st = state[task.id];
+
+  poolEl.innerHTML = "";
+  answerEl.innerHTML = "";
+
+  const poolIds = task.steps.map(s=>s.id).filter(id => !st.placed.includes(id));
+
+  if(poolIds.length === 0){
+    poolEl.innerHTML = '<div class="empty-hint">Všechny kroky jsou umístěné níže. Zkontroluj pořadí, nebo klikni na krok a vrať ho zpět.</div>';
+  } else {
+    shuffle(poolIds).forEach(id => {
+      const step = task.steps.find(s=>s.id===id);
+      poolEl.appendChild(buildCardEl(task, step));
+    });
+  }
+
+  if(st.placed.length === 0){
+    answerEl.innerHTML = '<div class="empty-hint">Sem klikáním přidávej kroky ve správném pořadí.</div>';
+  } else {
+    st.placed.forEach((id, idx) => {
+      const step = task.steps.find(s=>s.id===id);
+      const card = buildCardEl(task, step);
+      const badge = document.createElement("span");
+      badge.className = "badge";
+      badge.textContent = idx+1;
+      card.prepend(badge);
+      card.classList.add("placed");
+      answerEl.appendChild(card);
+    });
+  }
+
+  // restore input values that user already typed, matched by id
+  restoreInputValues(task);
+}
+
+const inputValues = {};
+
+function restoreInputValues(task){
+  const container = document.getElementById("task-" + task.id);
+  container.querySelectorAll(".card").forEach(card => {
+    const id = card.dataset.id;
+    const key = task.id + "-" + id;
+    const input = card.querySelector("input");
+    if(input && inputValues[key] !== undefined){
+      input.value = inputValues[key];
+    }
+    if(input){
+      input.addEventListener("input", () => {
+        inputValues[key] = input.value;
+      });
+    }
+  });
+}
+
+function toggleCard(task, id){
+  const st = state[task.id];
+  const key = task.id + "-" + id;
+  // save any typed value before re-render
+  const container = document.getElementById("task-" + task.id);
+  const existingInput = container.querySelector('.card[data-id="'+id+'"] input');
+  if(existingInput) inputValues[key] = existingInput.value;
+
+  if(st.placed.includes(id)){
+    st.placed = st.placed.filter(x => x !== id);
+  } else {
+    st.placed.push(id);
+  }
+  hideFeedback(task);
+  renderTask(task);
+}
+
+function hideFeedback(task){
+  const fb = document.getElementById("fb-" + task.id);
+  fb.className = "feedback";
+  fb.textContent = "";
+}
+
+function checkTask(task){
+  const st = state[task.id];
+  const fb = document.getElementById("fb-" + task.id);
+
+  if(st.placed.length !== task.steps.length){
+    fb.className = "feedback bad";
+    fb.textContent = "Ještě nemáš seřazené všechny kroky. Přidej zbývající kroky z nabídky nahoře.";
+    return;
+  }
+
+  const orderOk = task.order.every((id, idx) => st.placed[idx] === id);
+
+  let paramsOk = true;
+  let missingParam = false;
+  task.steps.forEach(step => {
+    if(step.hasInput){
+      const key = task.id + "-" + step.id;
+      const val = Number(inputValues[key]);
+      if(inputValues[key] === undefined || inputValues[key] === ""){
+        missingParam = true;
+        paramsOk = false;
+      } else if(val < step.min || val > step.max){
+        paramsOk = false;
+      }
+    }
+  });
+
+  if(!orderOk){
+    fb.className = "feedback bad";
+    fb.textContent = "Pořadí kroků ještě není správně. Zkus si znovu promyslet, co musí nastat dřív a co až potom.";
+    return;
+  }
+
+  if(missingParam){
+    fb.className = "feedback bad";
+    fb.textContent = "Pořadí je správně, ale ještě chybí doplnit číslo do jednoho z kroků.";
+    return;
+  }
+
+  if(!paramsOk){
+    fb.className = "feedback bad";
+    fb.textContent = "Pořadí je správně, ale zadané číslo nedává v tomhle kontextu smysl. Zkus ho upravit.";
+    return;
+  }
+
+  fb.className = "feedback ok";
+  fb.textContent = "✅ Výborně, algoritmus je správně! " + task.note;
+  state[task.id].solved = true;
+  document.querySelector('#tabs button[data-id="'+task.id+'"]').classList.add("done");
+}
+
+function resetTask(task){
+  state[task.id].placed = [];
+  state[task.id].solved = false;
+  Object.keys(inputValues).forEach(k => {
+    if(k.startsWith(task.id + "-")) delete inputValues[k];
+  });
+  document.querySelector('#tabs button[data-id="'+task.id+'"]').classList.remove("done");
+  hideFeedback(task);
+  renderTask(task);
+}
+
+function switchTask(id){
+  document.querySelectorAll("section.task").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.remove("active"));
+  document.getElementById("task-" + id).classList.add("active");
+  document.querySelector('#tabs button[data-id="'+id+'"]').classList.add("active");
+}
+
+// build DOM
+const tabsEl = document.getElementById("tabs");
+const container = document.getElementById("tasksContainer");
+
+TASKS.forEach((task, i) => {
+  const btn = document.createElement("button");
+  btn.textContent = task.icon + " " + task.tabLabel;
+  btn.dataset.id = task.id;
+  if(i===0) btn.classList.add("active");
+  btn.addEventListener("click", () => switchTask(task.id));
+  tabsEl.appendChild(btn);
+
+  const section = document.createElement("section");
+  section.className = "task" + (i===0 ? " active" : "");
+  section.id = "task-" + task.id;
+  section.innerHTML = `
+    <h2 class="task-title">${task.icon} ${task.title}</h2>
+    <p class="task-instr">${task.instr}</p>
+    <div class="zone-label">Nabídka kroků (klikni pro přidání)</div>
+    <div class="pool"></div>
+    <div class="zone-label">Tvůj algoritmus (klikni pro odebrání)</div>
+    <div class="answer"></div>
+    <div class="controls">
+      <button class="btn-check">Zkontrolovat</button>
+      <button class="btn-reset">Zamíchat znovu</button>
+    </div>
+    <div class="feedback" id="fb-${task.id}"></div>
+  `;
+  container.appendChild(section);
+
+  section.querySelector(".btn-check").addEventListener("click", () => checkTask(task));
+  section.querySelector(".btn-reset").addEventListener("click", () => resetTask(task));
+
+  renderTask(task);
+});
+</script>
+
+</body>
+</html>
