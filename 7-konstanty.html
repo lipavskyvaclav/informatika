@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datový Detektiv: Proměnné vs Konstanty</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --text-color: #c9d1d9;
+            --accent-blue: #58a6ff; /* Proměnné */
+            --accent-pink: #ff7b72; /* Konstanty */
+            --success: #3fb950;
+            --error: #f85149;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-weight: 900;
+            font-size: 2.5rem;
+            margin: 0;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .instructions {
+            color: #8b949e;
+            font-size: 0.95rem;
+            margin-top: 5px;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Oblast pro neroztříděné karty */
+        .source-pool {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px dashed #30363d;
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            min-height: 120px;
+        }
+
+        /* Cílové zóny */
+        .drop-zones {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .drop-zones {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .zone {
+            background: var(--card-bg);
+            border: 2px solid #30363d;
+            border-radius: 15px;
+            padding: 15px;
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .zone.active-target {
+            border-color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .zone-header {
+            text-align: center;
+            font-weight: 900;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #30363d;
+        }
+
+        .zone-promenne .zone-header { color: var(--accent-blue); }
+        .zone-konstanty .zone-header { color: var(--accent-pink); }
+
+        .card-container {
+            flex-grow: 1;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            gap: 10px;
+        }
+
+        /* Kartička */
+        .card {
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 10px 14px;
+            cursor: grab;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            width: calc(50% - 10px); /* Mobilní zobrazení 2 vedle sebe */
+        }
+
+        @media (min-width: 600px) {
+            .card { width: auto; max-width: 200px; }
+        }
+
+        .card:active { cursor: grabbing; }
+
+        .card.selected {
+            border-color: #fff;
+            transform: scale(1.05);
+            background: #30363d;
+        }
+
+        .card .tag {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #8b949e;
+        }
+
+        .card .label {
+            font-weight: 700;
+            font-size: 0.9rem;
+            line-height: 1.2;
+        }
+
+        /* Stavové barvy pro kontrolu */
+        .card.is-correct { border-color: var(--success); background: rgba(63, 185, 80, 0.1); }
+        .card.is-wrong { border-color: var(--error); background: rgba(248, 81, 73, 0.1); }
+
+        /* Tlačítko */
+        .controls {
+            display: flex;
+            justify-content: center;
+            padding: 20px 0;
+            width: 100%;
+        }
+
+        .check-btn {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 900;
+            border-radius: 50px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .check-btn:hover { background: #2ea043; transform: scale(1.05); }
+
+        #feedback {
+            font-weight: 700;
+            text-align: center;
+            margin-top: 10px;
+            min-height: 24px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Datový Detektiv</h1>
+        <div class="instructions">Roztřiď data podle toho, zda se mění (Proměnné) nebo jsou pevná (Konstanty).</div>
+    </header>
+
+    <div class="game-container">
+        <div class="source-pool" id="pool" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'pool')"></div>
+
+        <div class="drop-zones">
+            <div class="zone zone-promenne" onclick="handleZoneClick('promenna')" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'promenna')">
+                <div class="zone-header">Proměnné (X)</div>
+                <div class="card-container" id="zone-promenna"></div>
+            </div>
+
+            <div class="zone zone-konstanty" onclick="handleZoneClick('konstanta')" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'konstanta')">
+                <div class="zone-header">Konstanty (1)</div>
+                <div class="card-container" id="zone-konstanta"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="check-btn" onclick="checkLogic()">Zkontrolovat data</button>
+    </div>
+    <div id="feedback"></div>
+
+    <script>
+        const dataSet = [
+            // PROMĚNNÉ
+            { id: 1, label: "Můj aktuální věk", type: "promenna", tag: "v životě" },
+            { id: 2, label: "Stav zdraví (HP)", type: "promenna", tag: "ve hře" },
+            { id: 3, label: "Baterie v mobilu", type: "promenna", tag: "v životě" },
+            { id: 4, label: "Počet nasbíraných mincí", type: "promenna", tag: "ve hře" },
+            { id: 5, label: "Teplota venku", type: "promenna", tag: "v životě" },
+            { id: 6, label: "Množství paliva v nádrži", type: "promenna", tag: "v životě" },
+            { id: 7, label: "Aktuální skóre", type: "promenna", tag: "ve hře" },
+            { id: 8, label: "Hlasitost televize", type: "promenna", tag: "v životě" },
+            { id: 9, label: "Počet nábojů v zásobníku", type: "promenna", tag: "ve hře" },
+            { id: 10, label: "Výše tvého kapesného", type: "promenna", tag: "v životě" },
+
+            // KONSTANTY
+            { id: 11, label: "Počet planet Sluneční soustavy", type: "konstanta", tag: "ve vesmíru" },
+            { id: 12, label: "Moje datum narození", type: "konstanta", tag: "v životě" },
+            { id: 13, label: "Rychlost světla ve vakuu", type: "konstanta", tag: "ve vědě" },
+            { id: 14, label: "Počet hodin v jednom dni", type: "konstanta", tag: "v životě" },
+            { id: 15, label: "Chemická značka kyslíku (O)", type: "konstanta", tag: "ve vědě" },
+            { id: 16, label: "Gravitace na Zemi", type: "konstanta", tag: "v přírodě" },
+            { id: 17, label: "Počet měsíců v roce", type: "konstanta", tag: "v životě" },
+            { id: 18, label: "Bod varu čisté vody (100°C)", type: "konstanta", tag: "ve vědě" },
+            { id: 19, label: "Číslo Pí (π ≈ 3,14)", type: "konstanta", tag: "v matematice" },
+            { id: 20, label: "Maximální počet polí šachovnice", type: "konstanta", tag: "v deskovce" }
+        ];
+
+        let selectedId = null;
+
+        function init() {
+            const pool = document.getElementById('pool');
+            // Zamíchat pole
+            const shuffled = [...dataSet].sort(() => Math.random() - 0.5);
+            
+            shuffled.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.draggable = true;
+                card.id = `card-${item.id}`;
+                card.dataset.correct = item.type;
+                card.innerHTML = `
+                    <span class="tag">${item.tag}</span>
+                    <span class="label">${item.label}</span>
+                `;
+
+                // Drag and Drop (PC)
+                card.ondragstart = (e) => {
+                    e.dataTransfer.setData("text/plain", item.id);
+                    clearSelection();
+                };
+
+                // Tap and Click (Mobil/PC)
+                card.onclick = (e) => {
+                    e.stopPropagation();
+                    if (selectedId === item.id) {
+                        clearSelection();
+                    } else {
+                        clearSelection();
+                        selectedId = item.id;
+                        card.classList.add('selected');
+                    }
+                };
+
+                pool.appendChild(card);
+            });
+        }
+
+        function allowDrop(e) {
+            e.preventDefault();
+        }
+
+        function handleDrop(e, targetType) {
+            e.preventDefault();
+            const id = e.dataTransfer.getData("text/plain");
+            const element = document.getElementById(`card-${id}`);
+            if (element) {
+                moveCard(element, targetType);
+            }
+        }
+
+        function handleZoneClick(targetType) {
+            if (selectedId) {
+                const element = document.getElementById(`card-${selectedId}`);
+                moveCard(element, targetType);
+                clearSelection();
+            }
+        }
+
+        function moveCard(element, targetType) {
+            let container;
+            if (targetType === 'pool') {
+                container = document.getElementById('pool');
+            } else {
+                container = document.getElementById(`zone-${targetType}`);
+            }
+            container.appendChild(element);
+            element.classList.remove('is-correct', 'is-wrong');
+        }
+
+        function clearSelection() {
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+            selectedId = null;
+        }
+
+        function checkLogic() {
+            const feedback = document.getElementById('feedback');
+            let total = dataSet.length;
+            let currentInZones = document.querySelectorAll('.zone .card').length;
+            
+            if (currentInZones < total) {
+                feedback.innerText = "Detektive, ještě jsi neroztřídil všechna data!";
+                feedback.style.color = "#ffcc00";
+                return;
+            }
+
+            let errors = 0;
+            document.querySelectorAll('.zone').forEach(zone => {
+                const isPromennaZone = zone.classList.contains('zone-promenne');
+                const expected = isPromennaZone ? 'promenna' : 'konstanta';
+                
+                zone.querySelectorAll('.card').forEach(card => {
+                    if (card.dataset.correct === expected) {
+                        card.classList.add('is-correct');
+                        card.classList.remove('is-wrong');
+                    } else {
+                        card.classList.add('is-wrong');
+                        card.classList.remove('is-correct');
+                        errors++;
+                    }
+                });
+            });
+
+            if (errors === 0) {
+                feedback.innerText = "GRATULUJI! Databáze je v pořádku. 🎉";
+                feedback.style.color = "var(--success)";
+            } else {
+                feedback.innerText = `Něco nesedí! Máš tam ${errors} chyby v datech.`;
+                feedback.style.color = "var(--error)";
+            }
+        }
+
+        // Kliknutí na pozadí zruší výběr karty
+        document.addEventListener('click', clearSelection);
+
+        init();
+    </script>
+</body>
+</html>
