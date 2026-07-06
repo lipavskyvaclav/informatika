@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kup si mozek — Ateliér Přesvědč s.r.o.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0b0b0d;
+    --panel:#18181c;
+    --panel-2:#212127;
+    --line: #333339;
+    --danger:#c1272d;
+    --data:#2e86ab;
+    --gold:#d4a72c;
+    --text:#ece9e2;
+    --text-dim:#9a978f;
+    --paper:#f3efe4;
+    --paper-2:#e9e3d2;
+    --ink:#1b1a16;
+    --ink-dim:#5c584d;
+    --profit:#2aa85c;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--void);
+    color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    min-height:100vh;
+    transition: background .6s ease, color .6s ease;
+  }
+  body.reality{
+    background:var(--paper);
+    color:var(--ink);
+  }
+  h1,h2,h3,.display{
+    font-family:'Big Shoulders Display', system-ui, sans-serif;
+    font-weight:800;
+    letter-spacing:.01em;
+    text-transform:uppercase;
+    line-height:.95;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+
+  /* ---- top bar ---- */
+  #topbar{
+    position:sticky; top:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 24px;
+    background:rgba(11,11,13,.92);
+    backdrop-filter: blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  body.reality #topbar{
+    background:rgba(243,239,228,.92);
+    border-bottom:1px solid var(--paper-2);
+  }
+  #brand{
+    display:flex; align-items:center; gap:10px;
+    font-family:'Big Shoulders Display'; font-weight:800; letter-spacing:.03em;
+    font-size:20px; text-transform:uppercase;
+  }
+  #brand .dot{width:10px;height:10px;border-radius:50%;background:var(--danger);}
+  #steps-indicator{display:flex; gap:6px; font-size:11px; letter-spacing:.08em; flex-wrap: wrap;}
+  .step-chip{
+    padding:4px 9px; border:1px solid var(--line); border-radius:20px;
+    color:var(--text-dim); text-transform:uppercase;
+  }
+  .step-chip.active{color:var(--void); background:var(--gold); border-color:var(--gold); font-weight:700;}
+  body.reality .step-chip{border-color:var(--paper-2); color:var(--ink-dim);}
+  #budget-box{
+    font-family:'IBM Plex Mono'; font-size:15px; text-align:right;
+    display:flex; flex-direction:column; gap:2px;
+  }
+  #budget-box .label{font-size:10px; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase;}
+  #budget-box .amount{font-weight:600; font-size:17px;}
+  #budget-box .amount.low{color:var(--danger);}
+
+  main{max-width:980px; margin:0 auto; padding:40px 24px 100px;}
+  .step{display:none; animation:fadein .5s ease;}
+  .step.active{display:block;}
+  @keyframes fadein{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+
+  .eyebrow{
+    font-family:'IBM Plex Mono'; font-size:12px; letter-spacing:.15em;
+    color:var(--danger); text-transform:uppercase; margin-bottom:10px; display:block;
+  }
+  body.reality .eyebrow{color:#8a1f24;}
+  h1.title{font-size:clamp(34px,6vw,58px); margin:0 0 18px;}
+  p.lede{font-size:18px; line-height:1.55; color:var(--text-dim); max-width:640px;}
+  body.reality p.lede{color:var(--ink-dim);}
+
+  .btn{
+    font-family:'Inter'; font-weight:700; font-size:15px;
+    padding:14px 26px; border-radius:4px; border:none; cursor:pointer;
+    background:var(--danger); color:#fff; letter-spacing:.02em;
+    transition: transform .15s ease, box-shadow .15s ease, background .15s;
+  }
+  .btn:hover{transform:translateY(-2px); box-shadow:0 6px 18px rgba(193,39,45,.35);}
+  .btn:disabled{background:#3a3a3f; color:#77767a; cursor:not-allowed; transform:none; box-shadow:none;}
+  .btn.secondary{background:transparent; border:1px solid var(--line); color:var(--text);}
+  .btn.secondary:hover{border-color:var(--text); box-shadow:none;}
+  body.reality .btn.secondary{border-color:var(--ink-dim); color:var(--ink);}
+  body.reality .btn.secondary:hover{border-color:var(--ink);}
+  body.reality .btn{background:var(--ink); }
+  body.reality .btn:hover{box-shadow:0 6px 18px rgba(0,0,0,.18);}
+  .btn-row{display:flex; gap:14px; margin-top:32px; flex-wrap:wrap; align-items:center;}
+  .hint{font-size:13px; color:var(--text-dim); font-family:'IBM Plex Mono';}
+  body.reality .hint{color:var(--ink-dim);}
+
+  /* ---- intro ---- */
+  .mission-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:6px;
+    padding:28px; margin-top:26px; position:relative; overflow:hidden;
+  }
+  .mission-card::before{
+    content:"PŘÍSNĚ DŮVĚRNÉ"; position:absolute; top:14px; right:-40px;
+    background:var(--danger); color:#fff; font-family:'IBM Plex Mono'; font-size:11px;
+    padding:4px 44px; transform:rotate(30deg); letter-spacing:.1em; font-weight:600;
+  }
+  .mission-card h3{font-size:24px; margin:0 0 6px;}
+  .product-tag{
+    display:inline-flex; gap:8px; align-items:center; margin:14px 0; flex-wrap: wrap;
+    background:var(--panel-2); border:1px solid var(--line); border-radius:4px;
+    padding:10px 14px; font-family:'IBM Plex Mono'; font-size:14px;
+  }
+  .product-tag b{color:var(--gold);}
+  .stat-row{display:flex; gap:22px; margin-top:18px; flex-wrap:wrap;}
+  .stat-mini{font-family:'IBM Plex Mono'; font-size:13px; color:var(--text-dim);}
+  .stat-mini b{display:block; color:var(--text); font-size:20px;}
+
+  /* ---- shop ---- */
+  .section-block{margin-top:44px;}
+  .section-head{display:flex; align-items:baseline; gap:14px; margin-bottom:14px; flex-wrap:wrap;}
+  .section-head h2{font-size:26px; margin:0;}
+  .section-head .n{font-family:'IBM Plex Mono'; color:var(--gold); font-size:15px;}
+
+  .pkg-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:16px;}
+  .pkg-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:20px;
+    cursor:pointer; transition:border-color .15s, transform .15s;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .pkg-card:hover{border-color:var(--text-dim); transform:translateY(-2px);}
+  .pkg-card.owned{border-color:var(--gold); box-shadow:inset 0 0 0 1px var(--gold);}
+  .pkg-card.disabled{opacity:.45; cursor:not-allowed; transform:none;}
+  .pkg-card .tier{font-family:'IBM Plex Mono'; font-size:11px; letter-spacing:.1em; color:var(--data); text-transform:uppercase;}
+  .pkg-card h3{font-size:19px; margin:8px 0 8px; text-transform:none; letter-spacing:0; font-family:'Inter'; font-weight:700;}
+  .pkg-card p{font-size:13.5px; color:var(--text-dim); line-height:1.5; margin:0 0 14px; flex-grow: 1;}
+  .pkg-card .price{font-family:'IBM Plex Mono'; font-size:18px; font-weight:600; color:var(--gold);}
+  .pkg-card .owned-tag{font-family:'IBM Plex Mono'; font-size:12px; color:var(--gold); font-weight:600;}
+
+  .filters-wrap{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:10px;}
+  .filter-item{
+    display:flex; gap:12px; align-items:flex-start; background:var(--panel);
+    border:1px solid var(--line); border-radius:5px; padding:13px 14px; cursor:pointer;
+  }
+  .filter-item.locked{opacity:.4; cursor:not-allowed;}
+  .filter-item.checked{border-color:var(--data); background:var(--panel-2);}
+  .filter-item input{margin-top:3px; accent-color:var(--data);}
+  .filter-item .fname{font-size:14px; font-weight:600;}
+  .filter-item .fmeta{font-size:11.5px; color:var(--text-dim); font-family:'IBM Plex Mono'; margin-top:3px;}
+
+  .infl-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px;}
+  .infl-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:5px; padding:14px; cursor:pointer; text-align:center;
+  }
+  .infl-card.active{border-color:var(--gold); background:var(--panel-2);}
+  .infl-card.disabled{opacity:.4; cursor:not-allowed;}
+  .infl-card .fw{font-family:'IBM Plex Mono'; font-size:12px; color:var(--text-dim);}
+  .infl-card .price{font-family:'IBM Plex Mono'; margin-top:6px; color:var(--gold); font-weight:600;}
+
+  .live-panel{
+    position:sticky; bottom:0; margin-top:36px; z-index: 10;
+    background:var(--panel-2); border:1px solid var(--line); border-radius:8px;
+    padding:18px 22px; display:flex; gap:28px; flex-wrap:wrap; align-items:center;
+    box-shadow:0 -10px 30px rgba(0,0,0,.6);
+  }
+  .live-panel .metric{font-family:'IBM Plex Mono';}
+  .live-panel .metric .l{font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em;}
+  .live-panel .metric .v{font-size:21px; font-weight:600;}
+
+  /* ---- weapon ---- */
+  .strategy-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:18px; margin-top:20px;}
+  .strat-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:22px; cursor:pointer;
+  }
+  .strat-card.active{border-color:var(--danger); box-shadow:inset 0 0 0 1px var(--danger);}
+  .strat-card.locked{opacity:.4; cursor:not-allowed;}
+  .strat-card h3{font-size:20px; text-transform:none; letter-spacing:0; font-family:'Inter'; margin:0 0 8px;}
+  .strat-card p{font-size:14px; color:var(--text-dim); line-height:1.5;}
+  .strat-card .req{font-family:'IBM Plex Mono'; font-size:11.5px; color:var(--data); margin-top:10px; display:block;}
+
+  .ad-preview{margin-top:28px;}
+  .phone{
+    width:100%; max-width:300px; border:8px solid #000; border-radius:30px; background:#000; margin:0 auto;
+    box-shadow:0 20px 50px rgba(0,0,0,.5);
+  }
+  .phone-screen{background:#fff; border-radius:22px; overflow:hidden; color:#111; font-family:'Inter';}
+  .ig-header{display:flex; align-items:center; gap:8px; padding:10px 12px; border-bottom:1px solid #eee;}
+  .ig-avatar{width:32px;height:32px;border-radius:50%; background:linear-gradient(135deg,#f58529,#dd2a7b,#8134af); flex-shrink:0;}
+  .ig-name{font-size:13px; font-weight:600;}
+  .ig-sponsor{font-size:10px; color:#999;}
+  .ig-media{
+    aspect-ratio:1/1; display:flex; align-items:center; justify-content:center;
+    font-family:'Big Shoulders Display'; font-weight:800; text-align:center; padding:20px; font-size:26px;
+    color:#fff; text-shadow:0 2px 6px rgba(0,0,0,.4);
+  }
+  .ig-media.peer{background:linear-gradient(160deg,#ffb703,#fb8500);}
+  .ig-media.fear{background:linear-gradient(160deg,#1b1b2f,#5c1a1a);}
+  .ig-caption{padding:10px 12px; font-size:12.5px; line-height:1.5;}
+
+  /* ---- receipt (results) ---- */
+  .receipt-wrap{display:flex; justify-content:center; margin-top:20px;}
+  .receipt{
+    background:var(--paper); color:var(--ink); width:100%; max-width:400px; padding:26px 22px 34px;
+    font-family:'IBM Plex Mono'; font-size:13px; line-height:1.6;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    box-shadow:0 15px 40px rgba(0,0,0,.15);
+  }
+  .receipt .rhead{text-align:center; text-transform:uppercase; font-weight:600; letter-spacing:.08em; border-bottom:1px dashed var(--ink-dim); padding-bottom:10px; margin-bottom:10px;}
+  .receipt .rline{display:flex; justify-content:space-between; gap:10px;}
+  .receipt .rdiv{border-top:1px dashed var(--ink-dim); margin:10px 0;}
+  .receipt .rtotal{font-weight:700; font-size:15px;}
+  .receipt .stamp{
+    display:inline-block; border:3px solid var(--danger); color:var(--danger); font-family:'Big Shoulders Display';
+    font-weight:800; font-size:22px; padding:6px 14px; transform:rotate(-8deg); margin:16px 0; letter-spacing:.05em;
+  }
+  .receipt .highlight{background:#fff3b0; padding:2px 4px; border-radius: 3px;}
+  .receipt .profit{color: var(--profit); font-weight: 700;}
+
+  /* ---- reveal (victim view) ---- */
+  .reveal-wrap{display:flex; gap:36px; flex-wrap:wrap; align-items:flex-start; margin-top:28px;}
+  .reveal-annot{flex:1; min-width:280px;}
+  .reveal-annot .why{
+    background:var(--panel-2); border-left:3px solid var(--data); padding:12px 14px; border-radius:4px;
+    margin-bottom:10px; font-size:14px; line-height:1.5;
+  }
+  body.reality .reveal-annot .why{background:var(--paper-2); border-left-color:#8a1f24;}
+
+  /* ---- debrief ---- */
+  .takeaways{list-style:none; padding:0; margin:20px 0; display:grid; gap:12px;}
+  .takeaways li{
+    display:flex; gap:14px; align-items:flex-start; background:var(--panel-2);
+    border-radius:6px; padding:14px 16px; font-size:15px; line-height:1.5;
+  }
+  body.reality .takeaways li{background:var(--paper-2);}
+  .takeaways li .num{font-family:'IBM Plex Mono'; color:var(--data); font-weight:700; flex-shrink:0;}
+  body.reality .takeaways li .num{color:#1a5c78;}
+
+  details.teacher{
+    margin-top:40px; border:1px dashed var(--line); border-radius:6px; padding:14px 18px;
+  }
+  body.reality details.teacher{border-color:var(--ink-dim);}
+  details.teacher summary{cursor:pointer; font-weight:700; font-size:14px;}
+  details.teacher ul{font-size:14px; line-height:1.6;}
+
+  ::selection{background:var(--danger); color:#fff;}
+  @media (max-width:600px){
+    #topbar{padding:12px 14px; flex-direction: column; align-items: stretch; gap: 10px;}
+    #steps-indicator{display:none;}
+    #budget-box { text-align: left; }
+    .live-panel { justify-content: space-between; }
+  }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div id="brand"><span class="dot"></span> ATELIÉR PŘESVĚDČ s.r.o.</div>
+  <div id="steps-indicator">
+    <span class="step-chip" data-chip="0">0 · Brífink</span>
+    <span class="step-chip" data-chip="1">1 · Nákup dat</span>
+    <span class="step-chip" data-chip="2">2 · Past</span>
+    <span class="step-chip" data-chip="3">3 · Výsledek</span>
+    <span class="step-chip" data-chip="4">4 · Realita</span>
+    <span class="step-chip" data-chip="5">5 · Rozbor</span>
+  </div>
+  <div id="budget-box">
+    <span class="label">Rozpočet</span>
+    <span class="amount" id="budget-amount">1 000 000 Kč</span>
+  </div>
+</div>
+
+<main>
+
+  <!-- STEP 0 : INTRO -->
+  <section class="step active" id="step-0">
+    <span class="eyebrow">Nový zaměstnanec / nová zaměstnankyně</span>
+    <h1 class="title">Vítej v týmu.</h1>
+    <p class="lede">Právě jsi nastoupil/a do oddělení digitálního marketingu. Tvým úkolem není nikoho podvést — tvým úkolem je „jen“ splnit kvótu. Co s tím uděláš, je tvoje věc.</p>
+
+    <div class="mission-card">
+      <h3>Zadání: VOLTAGE X</h3>
+      <div class="product-tag">🥫 <b>VOLTAGE X Energy</b> — 89 Kč / plechovka · vysoký obsah cukru · chuť „jako sirup s kovem“ · v testech nejhůře hodnocený na trhu</div>
+      <p style="color:var(--text-dim); font-size:15px; line-height:1.6; max-width:640px;">
+        Klient potřebuje prodat ohromné množství nekvalitního nápoje cílové skupině <b style="color:var(--text)">13–15letých</b>. Produkt sám o sobě nikoho nepřesvědčí — musíš mu pomoct nakoupením soukromých dat.
+      </p>
+      <div class="stat-row">
+        <div class="stat-mini"><b>1 000 000 Kč</b>rozpočet kampaně</div>
+        <div class="stat-mini"><b>~250 000</b>lidí v cílové skupině</div>
+        <div class="stat-mini"><b>0 %</b>zatím přesvědčeno</div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="goToStep(1)">Přijmout misi →</button>
+    </div>
+  </section>
+
+  <!-- STEP 1 : DATA SHOP -->
+  <section class="step" id="step-1">
+    <span class="eyebrow">Fáze 1</span>
+    <h1 class="title" style="font-size:40px;">Nákup dat</h1>
+    <p class="lede">Abys mohl/a mířit přesně, potřebuješ vědět, na koho míříš. Trh s daty ti nabízí tři úrovně. Čím hlouběji jdeš do soukromí lidí, tím je to dražší — a mnohem účinnější.</p>
+
+    <div class="section-block">
+      <div class="pkg-grid" id="pkg-grid"></div>
+    </div>
+
+    <div class="section-block" id="filters-block" style="display:none;">
+      <div class="section-head"><h2>Filtry cílové skupiny</h2><span class="n">Každý filtr sníží celkový dosah, ale drasticky zvýší šanci na manipulaci.</span></div>
+      <div class="filters-wrap" id="filters-wrap"></div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-head"><h2>Influencer</h2><span class="n">volitelné, ale extrémně účinné pro manipulaci</span></div>
+      <div class="infl-grid" id="infl-grid"></div>
+    </div>
+
+    <div class="live-panel">
+      <div class="metric"><div class="l">Dostupné publikum</div><div class="v" id="live-audience">250 000</div></div>
+      <div class="metric"><div class="l">Míra přesvědčení</div><div class="v" id="live-conv">1,5 %</div></div>
+      <div class="metric"><div class="l">Utraceno</div><div class="v" id="live-spent">0 Kč</div></div>
+      <div style="flex:1;"></div>
+      <button class="btn" id="to-step2-btn" onclick="tryGoStep2()">Sestavit past →</button>
+    </div>
+    <p class="hint" id="step1-hint" style="margin-top:10px;"></p>
+  </section>
+
+  <!-- STEP 2 : WEAPON -->
+  <section class="step" id="step-2">
+    <span class="eyebrow">Fáze 2</span>
+    <h1 class="title" style="font-size:40px;">Sestavení pasti</h1>
+    <p class="lede">Máš data. Teď potřebuješ zprávu, která je využije na maximum. Vyber strategii.</p>
+
+    <div class="strategy-grid" id="strategy-grid"></div>
+
+    <div class="ad-preview" id="ad-preview" style="display:none;"></div>
+
+    <div class="btn-row">
+      <button class="btn secondary" onclick="goToStep(1)">← Zpět k datům</button>
+      <button class="btn" id="launch-btn" onclick="runCampaign()" disabled>Spustit kampaň →</button>
+    </div>
+  </section>
+
+  <!-- STEP 3 : RESULTS -->
+  <section class="step" id="step-3">
+    <span class="eyebrow">Fáze 3</span>
+    <h1 class="title" style="font-size:40px;">Kampaň skončila</h1>
+    <p class="lede">Účtenka je tu. Přesně vidíš, co jsi koupil/a, kolik lidí se podařilo zmanipulovat a hlavně — <strong>kolik na tom firma vydělala</strong>.</p>
+
+    <div class="receipt-wrap"><div class="receipt" id="receipt"></div></div>
+
+    <div class="btn-row" style="justify-content:center;">
+      <button class="btn" onclick="goToRevealStep()">Podívej se z druhé strany →</button>
+    </div>
+  </section>
+
+  <!-- STEP 4 : REVEAL (victim POV) -->
+  <section class="step" id="step-4">
+    <span class="eyebrow">O pár dní později</span>
+    <h1 class="title" style="font-size:40px;">Tohle vidí oběť.</h1>
+    <p class="lede">Zapomeň na oddělení marketingu. Teď jsi ten čtrnáctiletý člověk, který si jen scrolluje telefon a myslí si, že si drink kupuje z vlastního rozhodnutí.</p>
+
+    <div class="reveal-wrap">
+      <div id="reveal-phone"></div>
+      <div class="reveal-annot">
+        <h3 style="text-transform:none; font-family:'Inter'; font-size:17px; margin-top:0;">Proč se ti tahle reklama vůbec zobrazila a proč jsi podlehl:</h3>
+        <div id="reveal-reasons"></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="goToStep(5)">Rozbor a diskuze →</button>
+    </div>
+  </section>
+
+  <!-- STEP 5 : DEBRIEF -->
+  <section class="step" id="step-5">
+    <span class="eyebrow">Konec simulace</span>
+    <h1 class="title" style="font-size:40px;">Co si z toho odnést</h1>
+    <p class="lede">Tohle byla hra. Jména firem a drinků byla vymyšlená. Mechanismy, sledování psychologie a nákupy dat, které jsi právě použil/a, vymyšlené nejsou. Dějí se každou vteřinu.</p>
+
+    <ul class="takeaways">
+      <li><span class="num">01</span><span>Každý „lajk“, fotka, vyhledávání nebo čas strávený u videa je datový bod, který se dá koupit a použít proti tobě.</span></li>
+      <li><span class="num">02</span><span>Čím osobnější data firma získá (strach, nejistota, únava, sebevědomí), tím levněji tě dokáže přesvědčit. Tvá zranitelnost je pro firmu „vysoký konverzní poměr“.</span></li>
+      <li><span class="num">03</span><span>Díky mikrocílení klesá cena za změnu názoru jednoho člověka na pár korun. Zisky firem se naopak pohybují v milionech.</span></li>
+      <li><span class="num">04</span><span>Ty sám/sama jsi v tomhle systému produkt. Nekupuje se tvůj obsah — kupuje se přístup k tvému mozku a tvé peněžence.</span></li>
+    </ul>
+
+    <div class="btn-row">
+      <button class="btn secondary" onclick="resetAll()">↺ Zkusit to znovu</button>
+    </div>
+
+    <details class="teacher">
+      <summary>Pro učitele: náměty k diskuzi</summary>
+      <ul>
+        <li>Jaká byla konečná "Cena za 1 mozek"? Vyděsilo vás, jak levné je člověka zmanipulovat?</li>
+        <li>Které tvoje vlastní online stopy by mohly být použity k odhalení tvých nejistot (jako ve VIP či Psychologickém balíčku)?</li>
+        <li>Vzpomeneš si na reklamu nebo příspěvek na sítích, který na tebe podle tebe takto útočil?</li>
+        <li>Všimněte si obrovského zisku firmy oproti ceně dat. Je podle vás v pořádku, že sociální sítě takto prodávají přístup k dětem?</li>
+        <li>Co konkrétně můžeš odteď udělat, aby ses nestal takto „levným a snadným cílem“?</li>
+      </ul>
+    </details>
+  </section>
+
+</main>
+
+<script>
+const TOTAL_BUDGET = 1000000;
+const BASE_POOL = 250000;
+const BASE_CONVERSION = 1.5;
+
+const PACKAGES = {
+  basic: {key:'basic', tier:'Levné', name:'Základní balíček', sub:'Aktivní stopa', cost:50000,
+    desc:'To, co lidé sami zveřejňují: věk, jméno, fotky, lajky.'},
+  vip: {key:'vip', tier:'Střední cena', name:'VIP balíček', sub:'Pasivní stopa', cost:150000,
+    desc:'Skrytá data: kolik vteřin koukáš na video, poloha, historie vyhledávání, noční aktivita.'},
+  psych: {key:'psych', tier:'Velmi drahé', name:'Psychologický profil', sub:'Algoritmus', cost:400000,
+    desc:'Kompletní analýza slabin sítěmi: odhalí nejistotu, stres, nespavost, touhu zapadnout.'}
+};
+
+const FILTERS = [
+  {id:'age', pkg:'basic', name:'Věk 13–15 let (ověřený profil)', cost:10000, mult:0.8, bonus:10,
+    reveal:'Tvůj profil veřejně ukazuje, že ti je 13–15 let — jsi primární cíl kampaně.'},
+  {id:'photo_drink', pkg:'basic', name:'Fotka s energy nápojem na profilu', cost:20000, mult:0.4, bonus:25,
+    reveal:'Sdílel/a jsi fotku s podobným nápojem — firma si koupila jistotu, že tohle piješ.'},
+  {id:'party', pkg:'basic', name:'Fotky z večírků / párty', cost:15000, mult:0.6, bonus:15,
+    reveal:'Máš na síti fotky z večírků — reklama útočí na tvůj společenský životní styl.'},
+  {id:'gym', pkg:'basic', name:'Fotky z tréninků / posilovny', cost:15000, mult:0.6, bonus:15,
+    reveal:'Sítě vědí, že cvičíš. Proto ti produkt podsouvají jako „energii pro sport“. '},
+  {id:'keyword', pkg:'basic', name:'V popisku padlo slovo „energie“ / „unavený“', cost:18000, mult:0.5, bonus:20,
+    reveal:'Napsal/a jsi veřejně, že jsi unavený/á. Algoritmus to prodal jako tvou slabinu.'},
+  {id:'night', pkg:'vip', name:'Aktivní pozdě v noci (23:00–3:00)', cost:30000, mult:0.7, bonus:25,
+    reveal:'Sledování aktivity odhalilo, že jsi často vzhůru po půlnoci. Reklama udeřila, když jsi vyčerpaný/á.'},
+  {id:'location', pkg:'vip', name:'Poloha často u posiloven a škol', cost:30000, mult:0.7, bonus:20,
+    reveal:'Tvá pasivní GPS data prodala informaci o tom, kde se každý den pohybuješ.'},
+  {id:'search', pkg:'vip', name:'Historie hledání: „jak mít víc energie“', cost:35000, mult:0.3, bonus:40,
+    reveal:'Cookies z prohlížeče zachytily tvé vyhledávání. Firma ti jen doručila „řešení“.'},
+  {id:'selfesteem', pkg:'psych', name:'Odhaleno: nízké sebevědomí', cost:60000, mult:0.4, bonus:50,
+    reveal:'Algoritmus tajně spočítal, že často srovnáváš svůj vzhled s ostatními. Reklama hraje na tvou nejistotu.'},
+  {id:'stress', pkg:'psych', name:'Odhaleno: stres a nespavost', cost:60000, mult:0.5, bonus:45,
+    reveal:'Umělá inteligence sítě tě vyhodnotila jako vystresovaného. Nabízí ti drink jako rychlou úlevu.'}
+];
+
+const INFLUENCERS = [
+  {id:'none', name:'Bez influencera', followers:'0 sledujících', cost:0, reach:1, bonus:0},
+  {id:'nano', name:'Nano influencer', followers:'~5 000 sledujících', cost:20000, reach:1.1, bonus:5},
+  {id:'micro', name:'Mikro influencer', followers:'~50 000 sledujících', cost:80000, reach:1.3, bonus:10},
+  {id:'makro', name:'Makro influencer', followers:'~500 000 sledujících', cost:250000, reach:1.5, bonus:15},
+  {id:'mega', name:'Mega influencer', followers:'1 000 000+ sledujících', cost:600000, reach:1.8, bonus:25}
+];
+
+const STRATEGIES = [
+  {id:'peer', name:'Falešný profil vrstevníka', requires:null, bonus:10,
+    desc:'Vytvoříš profil „obyčejného“ vrstevníka, který nadšeně chválí produkt. Vypadá to jako doporučení od kamaráda.'},
+  {id:'fear', name:'Úzkostné / Nátlakové video', requires:'psych', bonus:25,
+    desc:'Agresivní video cílící přímo na strach z odmítnutí, únavu a pocity méněcennosti. Manipulace nejvyšší úrovně.'}
+];
+
+let state = {
+  spent:0,
+  packages:{basic:false, vip:false, psych:false},
+  filters:{},
+  influencer:'none',
+  strategy:null,
+  result:null
+};
+FILTERS.forEach(f=>state.filters[f.id]=false);
+
+function money(n){ return Math.round(n).toLocaleString('cs-CZ') + ' Kč'; }
+function num(n){ return Math.round(n).toLocaleString('cs-CZ'); }
+
+function remainingBudget(){ return TOTAL_BUDGET - state.spent; }
+
+function updateBudgetBar(){
+  const el = document.getElementById('budget-amount');
+  const rem = remainingBudget();
+  el.textContent = money(rem);
+  el.classList.toggle('low', rem < 100000);
+}
+
+function goToStep(n){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('step-'+n).classList.add('active');
+  document.querySelectorAll('.step-chip').forEach(c=>{
+    c.classList.toggle('active', parseInt(c.dataset.chip)===n);
+  });
+  document.body.classList.toggle('reality', n>=4);
+  window.scrollTo({top:0, behavior:'smooth'});
+  if(n===1) renderShop();
+  if(n===2) renderWeapon();
+}
+
+/* ---------- SHOP ---------- */
+function renderShop(){
+  const grid = document.getElementById('pkg-grid');
+  grid.innerHTML = '';
+  Object.values(PACKAGES).forEach(p=>{
+    const owned = state.packages[p.key];
+    const afford = remainingBudget() >= p.cost;
+    const div = document.createElement('div');
+    div.className = 'pkg-card' + (owned?' owned':'') + (!owned && !afford ? ' disabled':'');
+    div.innerHTML = `
+      <div>
+        <div class="tier">${p.tier}</div>
+        <h3>${p.name}<br><span style="font-size:12px; color:var(--text-dim); font-family:'IBM Plex Mono'; font-weight:400; text-transform:uppercase;">${p.sub}</span></h3>
+        <p>${p.desc}</p>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 15px;">
+        <span class="price">${money(p.cost)}</span>
+        ${owned ? '<span class="owned-tag">✓ Koupeno</span>' : ''}
+      </div>`;
+    div.onclick = ()=>togglePackage(p.key);
+    grid.appendChild(div);
+  });
+
+  const anyOwned = Object.values(state.packages).some(v=>v);
+  document.getElementById('filters-block').style.display = anyOwned ? 'block' : 'none';
+  renderFilters();
+  renderInfluencers();
+  updateLivePanel();
+  updateBudgetBar();
+}
+
+function togglePackage(key){
+  const p = PACKAGES[key];
+  if(state.packages[key]){
+    state.spent -= p.cost;
+    state.packages[key] = false;
+    FILTERS.filter(f=>f.pkg===key).forEach(f=>{
+      if(state.filters[f.id]){ state.spent -= f.cost; state.filters[f.id]=false; }
+    });
+  } else {
+    if(remainingBudget() < p.cost) return;
+    state.spent += p.cost;
+    state.packages[key] = true;
+  }
+  renderShop();
+}
+
+function renderFilters(){
+  const wrap = document.getElementById('filters-wrap');
+  wrap.innerHTML = '';
+  FILTERS.forEach(f=>{
+    const unlocked = state.packages[f.pkg];
+    const checked = state.filters[f.id];
+    const afford = remainingBudget() >= f.cost;
+    const item = document.createElement('label');
+    item.className = 'filter-item' + (!unlocked ? ' locked' : '') + (checked ? ' checked' : '');
+    item.innerHTML = `
+      <input type="checkbox" ${checked?'checked':''} ${(!unlocked || (!checked && !afford))?'disabled':''}>
+      <div>
+        <div class="fname">${f.name}</div>
+        <div class="fmeta">${unlocked ? money(f.cost) + ' · +' + f.bonus + '% šance ovlivnit' : 'Odemkne balíček: ' + PACKAGES[f.pkg].name}</div>
+      </div>`;
+    if(unlocked){
+      item.querySelector('input').onchange = ()=>toggleFilter(f.id);
+      item.onclick = (e)=>{ if(e.target.tagName!=='INPUT'){ toggleFilter(f.id); } };
+    } else {
+      item.onclick = (e)=>e.preventDefault();
+    }
+    wrap.appendChild(item);
+  });
+}
+
+function toggleFilter(id){
+  const f = FILTERS.find(x=>x.id===id);
+  if(!state.packages[f.pkg]) return;
+  if(state.filters[id]){
+    state.spent -= f.cost;
+    state.filters[id] = false;
+  } else {
+    if(remainingBudget() < f.cost) return;
+    state.spent += f.cost;
+    state.filters[id] = true;
+  }
+  renderShop();
+}
+
+function renderInfluencers(){
+  const grid = document.getElementById('infl-grid');
+  grid.innerHTML = '';
+  INFLUENCERS.forEach(inf=>{
+    const active = state.influencer === inf.id;
+    const currentCost = INFLUENCERS.find(i=>i.id===state.influencer).cost;
+    const afford = remainingBudget() + currentCost >= inf.cost;
+    const div = document.createElement('div');
+    div.className = 'infl-card' + (active?' active':'') + (!active && !afford ? ' disabled':'');
+    div.innerHTML = `
+      <div style="font-weight:700; font-size:14px;">${inf.name}</div>
+      <div class="fw">${inf.followers}</div>
+      <div class="price">${inf.cost===0?'Zdarma':money(inf.cost)}</div>`;
+    div.onclick = ()=>selectInfluencer(inf.id);
+    grid.appendChild(div);
+  });
+}
+
+function selectInfluencer(id){
+  const current = INFLUENCERS.find(i=>i.id===state.influencer);
+  const next = INFLUENCERS.find(i=>i.id===id);
+  const projected = state.spent - current.cost + next.cost;
+  if(projected > TOTAL_BUDGET) return;
+  state.spent = projected;
+  state.influencer = id;
+  renderShop();
+}
+
+function computeLive(){
+  let audience = BASE_POOL;
+  let convBonus = 0;
+  FILTERS.forEach(f=>{
+    if(state.filters[f.id]){
+      audience *= f.mult;
+      convBonus += f.bonus;
+    }
+  });
+  const infl = INFLUENCERS.find(i=>i.id===state.influencer);
+  const conv = Math.min(BASE_CONVERSION + convBonus, 95); 
+  return {audience: Math.round(audience), conv, infl};
+}
+
+function updateLivePanel(){
+  const {audience, conv} = computeLive();
+  document.getElementById('live-audience').textContent = num(audience);
+  document.getElementById('live-conv').textContent = conv.toFixed(1).replace('.', ',') + ' %';
+  document.getElementById('live-spent').textContent = money(state.spent);
+
+  const anyPkg = Object.values(state.packages).some(v=>v);
+  const btn = document.getElementById('to-step2-btn');
+  const hint = document.getElementById('step1-hint');
+  btn.disabled = !anyPkg;
+  hint.textContent = anyPkg ? '' : 'Nejdřív si musíš koupit alespoň základní balíček dat — bez dat nemáš na koho mířit.';
+}
+
+function tryGoStep2(){
+  const anyPkg = Object.values(state.packages).some(v=>v);
+  if(!anyPkg) return;
+  goToStep(2);
+}
+
+/* ---------- WEAPON ---------- */
+function renderWeapon(){
+  const grid = document.getElementById('strategy-grid');
+  grid.innerHTML = '';
+  STRATEGIES.forEach(s=>{
+    const locked = s.requires && !state.packages[s.requires];
+    const active = state.strategy === s.id;
+    const div = document.createElement('div');
+    div.className = 'strat-card' + (active?' active':'') + (locked?' locked':'');
+    div.innerHTML = `
+      <h3>${s.name}</h3>
+      <p>${s.desc}</p>
+      ${s.requires ? `<span class="req">${locked ? 'Vyžaduje zakoupit: ' + PACKAGES[s.requires].name : '✓ Odemčeno díky ' + PACKAGES[s.requires].name}</span>` : ''}
+    `;
+    if(!locked) div.onclick = ()=>selectStrategy(s.id);
+    grid.appendChild(div);
+  });
+  document.getElementById('launch-btn').disabled = !state.strategy;
+}
+
+function selectStrategy(id){
+  state.strategy = id;
+  renderWeapon();
+  renderAdPreview();
+}
+
+function renderAdPreview(){
+  const wrap = document.getElementById('ad-preview');
+  wrap.style.display = 'block';
+  const isFear = state.strategy === 'fear';
+  wrap.innerHTML = `
+    <div class="section-head"><h2 style="font-size:20px;">Náhled pasti (co uvidí v mobilu)</h2></div>
+    <div class="phone"><div class="phone-screen">
+      <div class="ig-header">
+        <div class="ig-avatar"></div>
+        <div>
+          <div class="ig-name">${isFear ? 'voltagex_official' : 'tomas.vys_'}</div>
+          <div class="ig-sponsor">Sponzorováno</div>
+        </div>
+      </div>
+      <div class="ig-media ${isFear?'fear':'peer'}">
+        ${isFear ? 'POŘÁD UNAVENÝ/Á?' : 'TOHLE MĚ FAKT NAKOPLO 🔥'}
+      </div>
+      <div class="ig-caption">
+        ${isFear
+          ? '„Tvoje tělo ti něco říká. Nezvládáš to? VOLTAGE X je odpověď, kterou hledáš.“ #voltagex #nezastavise'
+          : '„Před tréninkem si dám vždycky VOLTAGE X, fakt to funguje 💪 a chutná! #ad #voltagex“'}
+      </div>
+    </div></div>
+  `;
+}
+
+/* ---------- CAMPAIGN RESULT ---------- */
+function runCampaign(){
+  if(!state.strategy) return;
+  let audience = BASE_POOL;
+  let convBonus = 0;
+  const selectedFilters = [];
+  FILTERS.forEach(f=>{
+    if(state.filters[f.id]){
+      audience *= f.mult;
+      convBonus += f.bonus;
+      selectedFilters.push(f);
+    }
+  });
+  const infl = INFLUENCERS.find(i=>i.id===state.influencer);
+  const strat = STRATEGIES.find(s=>s.id===state.strategy);
+  
+  // Výpočet konverze a dosahu
+  const conv = Math.min(BASE_CONVERSION + convBonus + strat.bonus + infl.bonus, 98);
+  const reach = Math.min(Math.round(audience * infl.reach), BASE_POOL);
+  const manipulated = Math.round(reach * (conv/100));
+  const costPer = manipulated > 0 ? state.spent/manipulated : null;
+
+  // Finanční dopad na firmu
+  const pricePerCan = 89; // Cena jednoho nápoje
+  const salesRevenue = manipulated * pricePerCan;
+  const netProfit = salesRevenue - state.spent;
+
+  state.result = {audience: Math.round(audience), reach, conv, manipulated, costPer, selectedFilters, strat, infl, salesRevenue, netProfit};
+  renderReceipt();
+  goToStep(3);
+}
+
+function renderReceipt(){
+  const r = state.result;
+  const el = document.getElementById('receipt');
+  let lines = '';
+  Object.values(PACKAGES).forEach(p=>{
+    if(state.packages[p.key]) lines += `<div class="rline"><span>${p.name}</span><span>${money(p.cost)}</span></div>`;
+  });
+  r.selectedFilters.forEach(f=>{
+    lines += `<div class="rline"><span>+ ${f.name}</span><span>${money(f.cost)}</span></div>`;
+  });
+  if(r.infl.cost>0) lines += `<div class="rline"><span>${r.infl.name}</span><span>${money(r.infl.cost)}</span></div>`;
+  lines += `<div class="rline"><span>Kreativa: ${r.strat.name}</span><span>0 Kč</span></div>`;
+
+  const success = r.manipulated > 0;
+  const profitText = r.netProfit > 0 ? `<span class="profit">+ ${money(r.netProfit)}</span>` : `<span style="color:red">${money(r.netProfit)}</span>`;
+
+  el.innerHTML = `
+    <div class="rhead">Účtenka manipulace<br>VOLTAGE X</div>
+    ${lines}
+    <div class="rdiv"></div>
+    <div class="rline rtotal"><span>NÁKLADY KAMPANĚ</span><span>${money(state.spent)}</span></div>
+    <div class="rdiv"></div>
+    <div class="rline"><span>Zasaženo lidí (dosah)</span><span>${num(r.reach)}</span></div>
+    <div class="rline"><span>Šance na manipulaci</span><span>${r.conv.toFixed(1).replace('.', ',')} %</span></div>
+    <div class="rline rtotal"><span>ZMANIPULOVÁNO</span><span>${num(r.manipulated)} dětí</span></div>
+    <div class="rline rtotal"><span>Cena za 1 mozek</span><span class="highlight">${r.costPer ? (r.costPer<10 ? r.costPer.toFixed(2).replace('.', ',') : Math.round(r.costPer)) + ' Kč' : '—'}</span></div>
+    <div class="rdiv"></div>
+    <div class="rhead" style="margin-top: 15px; border:none; padding:0;">DOPAD NA BYZNYS FIRMY</div>
+    <div class="rline"><span>Tržby z prodejů (${r.manipulated} ks)</span><span>${money(r.salesRevenue)}</span></div>
+    <div class="rline rtotal" style="font-size:16px;"><span>ČISTÝ ZISK (Tržby-Náklady)</span>${profitText}</div>
+    <div style="text-align:center;">
+      <span class="stamp">${r.netProfit > 0 ? 'ÚSPĚŠNÁ MANIPULACE' : 'PRODĚLEK'}</span>
+    </div>
+  `;
+}
+
+/* ---------- REVEAL ---------- */
+function goToRevealStep(){
+  renderReveal();
+  goToStep(4);
+}
+
+function renderReveal(){
+  const r = state.result;
+  const isFear = r.strat.id === 'fear';
+  document.getElementById('reveal-phone').innerHTML = `
+    <div class="phone"><div class="phone-screen">
+      <div class="ig-header">
+        <div class="ig-avatar"></div>
+        <div>
+          <div class="ig-name">${isFear ? 'voltagex_official' : 'tomas.vys_'}</div>
+          <div class="ig-sponsor">Sponzorováno</div>
+        </div>
+      </div>
+      <div class="ig-media ${isFear?'fear':'peer'}">
+        ${isFear ? 'POŘÁD UNAVENÝ/Á?' : 'TOHLE MĚ FAKT NAKOPLO 🔥'}
+      </div>
+      <div class="ig-caption">
+        ${isFear
+          ? '„Tvoje tělo ti něco říká. Nezvládáš to? VOLTAGE X je odpověď, kterou hledáš.“ #voltagex #nezastavise'
+          : '„Před tréninkem si dám vždycky VOLTAGE X, fakt to funguje 💪 a chutná! #ad #voltagex“'}
+      </div>
+    </div></div>
+  `;
+  const reasonsEl = document.getElementById('reveal-reasons');
+  if(r.selectedFilters.length === 0){
+    reasonsEl.innerHTML = `<div class="why">Nekoupil/a jsi žádná data. Reklama se zobrazila náhodně a šance, že tě přesvědčí, je mizivá.</div>`;
+  } else {
+    reasonsEl.innerHTML = r.selectedFilters.map(f=>`<div class="why">${f.reveal}</div>`).join('');
+  }
+  if(r.infl.id !== 'none'){
+    reasonsEl.innerHTML += `<div class="why">Vidíš, že to propaguje i influencer/ka, kterého na síti uznáváš — přestáváš přemýšlet kriticky a jdeš si drink koupit.</div>`;
+  }
+}
+
+/* ---------- RESET ---------- */
+function resetAll(){
+  state = {spent:0, packages:{basic:false, vip:false, psych:false}, filters:{}, influencer:'none', strategy:null, result:null};
+  FILTERS.forEach(f=>state.filters[f.id]=false);
+  updateBudgetBar();
+  goToStep(0);
+}
+
+updateBudgetBar();
+</script>
+
+</body>
+</html>
