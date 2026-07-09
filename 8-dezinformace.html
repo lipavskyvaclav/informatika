@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dezinformace – Pracovní list</title>
+    <style>
+        :root {
+            --primary: #2b6cb0;
+            --bg: #f7fafc;
+            --box-bg: #ffffff;
+            --border: #e2e8f0;
+            --text: #2d3748;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1, h2, h3 {
+            color: var(--primary);
+        }
+        .intro {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .articles-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .article-col {
+            flex: 1 1 45%;
+            background: var(--box-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .article-content {
+            background-color: #edf2f7;
+            padding: 15px;
+            border-left: 4px solid var(--primary);
+            margin-bottom: 20px;
+            border-radius: 0 4px 4px 0;
+        }
+        .article-content h3 {
+            margin-top: 0;
+            font-size: 1.1em;
+        }
+        .meta {
+            font-size: 0.85em;
+            color: #4a5568;
+            margin-bottom: 15px;
+        }
+        .question-group {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed var(--border);
+        }
+        .question-group:last-child {
+            border-bottom: none;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.95em;
+        }
+        input[type="text"], select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .checkbox-group input {
+            width: auto;
+        }
+        .checkbox-group label {
+            margin-bottom: 0;
+            font-weight: normal;
+        }
+        .save-btn-container {
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+        button.save-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button.save-btn:hover {
+            background-color: #1a4a79;
+        }
+        .result-box {
+            background-color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .result-box select {
+            font-weight: bold;
+            font-size: 1.1em;
+            text-align: center;
+        }
+        @media (max-width: 768px) {
+            .article-col {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="intro">
+        <h1>Dezinformace</h1>
+        <p><strong>Úkol:</strong> Přečti si pozorně oba články o klimatických změnách a porovnej je. Odpověz na otázky pod textem. Nezapomeň na konci list uložit!</p>
+        <div style="text-align: left; max-width: 300px; margin: 0 auto 20px auto;">
+            <label for="student-name">Jméno a příjmení:</label>
+            <input type="text" id="student-name" placeholder="Napiš své jméno...">
+        </div>
+    </div>
+
+    <div class="articles-wrapper">
+        
+        <!-- ČLÁNEK A -->
+        <div class="article-col">
+            <h2>Článek A – iDNES.cz</h2>
+            <div class="article-content">
+                <h3>ČEŠI LETOS ZAŽILI NEJTEPLEJŠÍ LÉTO OD ZAČÁTKU MĚŘENÍ, POTVRZUJE ČHMÚ</h3>
+                <div class="meta">Publikováno: 5. 9. 2025 | Autor: Bc. Tereza Tykalová, redakce iDNES.cz</div>
+                <p>Letošní léto bylo podle dat Českého hydrometeorologického ústavu (ČHMÚ) nejteplejší od roku 1775, kdy začalo systematické měření teplot. Průměrná teplota dosáhla 20,1 stupně Celsia, což je o 2,8 stupně více než dlouhodobý průměr.</p>
+                <p>„Jedná se o pokračování dlouhodobého trendu oteplování, který pozorujeme v posledních desetiletích,“ uvedl pro iDNES doc. RNDr. Radim Tolasz, Ph.D., klimatolog z ČHMÚ. „Podobné extrémní hodnoty zaznamenává většina evropských zemí.“</p>
+                <p>Podle dat ČHMÚ bylo také výrazně suché léto – srážky dosáhly pouze 60 % dlouhodobého průměru. Nejméně deště spadlo na jižní Moravě.</p>
+                <p><small>Kompletní data jsou dostupná na: chmi.cz/files/portal/docs/meteo</small></p>
+            </div>
+
+            <div class="questions">
+                <div class="question-group">
+                    <label>Je autor novinář?</label>
+                    <select>
+                        <option value="">-- Vyber možnost --</option>
+                        <option value="ano">Ano, lze dohledat, že je žurnalistka</option>
+                        <option value="ne">Ne, práce v iDNES je smyšlená</option>
+                        <option value="nevim">Nevím, nelze to dohledat</option>
+                    </select>
+                </div>
+                
+                <div class="question-group">
+                    <label>Kdo je citovaný expert?</label>
+                    <input type="text" placeholder="Napiš jméno a funkci...">
+                </div>
+
+                <div class="question-group">
+                    <label>Je expert opravdu expert v daném oboru?</label>
+                    <select>
+                        <option value="">-- Vyber možnost --</option>
+                        <option value="ano">Ano, je to vědec (klimatolog)</option>
+                        <option value="ne">Ne, nemá potřebné vzdělání</option>
+                    </select>
+                </div>
+
+                <div class="question-group">
+                    <label>Jaké jsou zdroje informací?</label>
+                    <textarea placeholder="Odkud autorka čerpá data?"></textarea>
+                </div>
+
+                <div class="question-group">
+                    <label>Jsou uvedena konkrétní čísla a data?</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="a-data-yes">
+                        <label for="a-data-yes">Ano, obsahuje přesná data</label>
+                    </div>
+                    <input type="text" placeholder="Pokud ano, vypiš alespoň dvě čísla z textu...">
+                </div>
+
+                <div class="question-group">
+                    <label>Myslíte, že si můžeme informace ověřit i jinde?</label>
+                    <input type="text" placeholder="Kde bys tyto informace hledal/a?">
+                </div>
+
+                <div class="result-box">
+                    <label>Hodnocení článku A:</label>
+                    <select>
+                        <option value="">-- Vyber typ článku --</option>
+                        <option value="seriozni">SERIÓZNÍ ČLÁNEK</option>
+                        <option value="dezinformacni">DEZINFORMAČNÍ ČLÁNEK</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- ČLÁNEK B -->
+        <div class="article-col">
+            <h2>Článek B – PravdaProLidi.cz</h2>
+            <div class="article-content">
+                <h3>LŽIVÉ ALARMOVÁNÍ! KLIMA SE NEMĚNÍ – JDE JEN O PŘIROZENÉ CYKLY!</h3>
+                <div class="meta">Publikováno: 3. 9. 2025 | Autor: PhDr. Milan Svoboda</div>
+                <p>Zase nám lžou! Údajně nejteplejší léto je jen manipulace s daty. Já už roky varuji, že „klimatická změna“ je jen výmysl, kterým nás chtějí ovládat!</p>
+                <p>„Měřicí stanice jsou umístěny v tepelných ostrovech měst, což zkresluje data. Ve skutečnosti se klima nemění už tisíce let,“ vysvětluje statečný publicista Ivan Smetana.</p>
+                <p>Smetana vysvětluje, že za výmyslem klimatických změn stojí Světové ekonomické fórum. Pod jeho vedením se má krok za krokem zavádět totalitní kontrola nad obyvateli celého světa. Obyčejní lidé se podle něj mají stát závislými na rozhodnutích několika vyvolených.</p>
+                <p>PRAVDA: V 70. letech nám říkali, že přijde doba ledová! Teď zas oteplování! Nesdílejte články mainstreamových médií – sdílejte jen pravdu!</p>
+            </div>
+
+            <div class="questions">
+                <div class="question-group">
+                    <label>Je autor novinář?</label>
+                    <select>
+                        <option value="">-- Vyber možnost --</option>
+                        <option value="ano">Ano, lze dohledat, že je to žurnalista</option>
+                        <option value="ne">Ne, je to random týpek, co píše pro pochybný web</option>
+                        <option value="nevim">Nevím, nelze to dohledat</option>
+                    </select>
+                </div>
+                
+                <div class="question-group">
+                    <label>Kdo je citovaný expert?</label>
+                    <input type="text" placeholder="Napiš jméno a funkci...">
+                </div>
+
+                <div class="question-group">
+                    <label>Je expert opravdu expert v daném oboru?</label>
+                    <select>
+                        <option value="">-- Vyber možnost --</option>
+                        <option value="ano">Ano, je to vědec (klimatolog)</option>
+                        <option value="ne">Ne, nemá potřebné vzdělání</option>
+                    </select>
+                </div>
+
+                <div class="question-group">
+                    <label>Jaké jsou zdroje informací?</label>
+                    <textarea placeholder="Odkud autor čerpá data?"></textarea>
+                </div>
+
+                <div class="question-group">
+                    <label>Jsou uvedena konkrétní čísla a data?</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="b-data-yes">
+                        <label for="b-data-yes">Ano, obsahuje přesná data</label>
+                    </div>
+                    <input type="text" placeholder="Vypiš případná data, nebo napiš, proč chybí...">
+                </div>
+
+                <div class="question-group">
+                    <label>Myslíte, že si můžeme informace ověřit i jinde?</label>
+                    <input type="text" placeholder="Dají se tvrzení z tohoto článku ověřit? Proč ano/ne?">
+                </div>
+
+                <div class="result-box">
+                    <label>Hodnocení článku B:</label>
+                    <select>
+                        <option value="">-- Vyber typ článku --</option>
+                        <option value="seriozni">SERIÓZNÍ ČLÁNEK</option>
+                        <option value="dezinformacni">DEZINFORMAČNÍ ČLÁNEK</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="save-btn-container">
+        <button class="save-btn" onclick="saveWorksheet()">Uložit vypracovaný list</button>
+        <p><small style="color: #718096; margin-top: 10px; display: block;">Po kliknutí se stáhne tvůj vyplněný HTML soubor do počítače.</small></p>
+    </div>
+</div>
+
+<script>
+    function saveWorksheet() {
+        // Aktualizace textových polí a jména
+        document.querySelectorAll('input[type="text"]').forEach(el => {
+            el.setAttribute('value', el.value);
+        });
+
+        // Aktualizace velkých textových polí (textarea)
+        document.querySelectorAll('textarea').forEach(el => {
+            el.textContent = el.value;
+        });
+
+        // Aktualizace roletkových menu (select)
+        document.querySelectorAll('select').forEach(sel => {
+            Array.from(sel.options).forEach(opt => {
+                if (opt.selected) {
+                    opt.setAttribute('selected', 'selected');
+                } else {
+                    opt.removeAttribute('selected');
+                }
+            });
+        });
+
+        // Aktualizace zaškrtávacích políček (checkbox)
+        document.querySelectorAll('input[type="checkbox"]').forEach(el => {
+            if (el.checked) {
+                el.setAttribute('checked', 'checked');
+            } else {
+                el.removeAttribute('checked');
+            }
+        });
+
+        // Vygenerování nového HTML kódu se zapsanými odpověďmi
+        const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+        
+        // Získání jména studenta pro název souboru
+        let studentName = document.getElementById('student-name').value.trim();
+        if (studentName === "") studentName = "zák";
+        // Odstranění diakritiky a mezer pro bezpečný název souboru
+        studentName = studentName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_').toLowerCase();
+        
+        const fileName = `8_1_dezinformace_${studentName}.html`;
+
+        // Vytvoření souboru a spuštění stahování
+        const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+</script>
+
+</body>
+</html>
