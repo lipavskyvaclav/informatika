@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kybergrooming a sextortion – odhadni čísla</title>
+<style>
+  :root{
+    --ink:#1c2b2a;
+    --ink-soft:#425856;
+    --bg:#f4f2ec;
+    --card:#ffffff;
+    --teal:#0f6e56;
+    --teal-light:#d9ede7;
+    --amber:#c98500;
+    --amber-light:#faedd2;
+    --red:#a32d2d;
+    --red-light:#f7dede;
+    --track:#e3e0d4;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+    line-height:1.55;
+    padding:0 0 60px;
+  }
+  header{
+    background:var(--teal);
+    color:#fff;
+    padding:36px 20px 44px;
+    text-align:center;
+  }
+  header h1{
+    margin:0 0 10px;
+    font-size:clamp(24px,5vw,34px);
+    font-weight:700;
+    letter-spacing:-0.02em;
+  }
+  header p{
+    margin:0;
+    max-width:600px;
+    margin-inline:auto;
+    font-size:15px;
+    opacity:0.92;
+  }
+  .wrap{
+    max-width:640px;
+    margin:-24px auto 0;
+    padding:0 16px;
+  }
+  .intro{
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:22px 22px 24px;
+    box-shadow:0 4px 18px rgba(0,0,0,0.06);
+    margin-bottom:22px;
+    font-size:15px;
+  }
+  .intro strong{color:var(--teal);}
+  .card{
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:24px 22px 26px;
+    margin-bottom:22px;
+    box-shadow:0 4px 18px rgba(0,0,0,0.06);
+  }
+  .q-tag{
+    display:inline-block;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--teal);
+    background:var(--teal-light);
+    padding:4px 10px;
+    border-radius:20px;
+    margin-bottom:12px;
+  }
+  .card h2{
+    margin:0 0 8px;
+    font-size:19px;
+    font-weight:700;
+  }
+  .card .sub{
+    font-size:14px;
+    color:var(--ink-soft);
+    margin:0 0 20px;
+  }
+  .slider-block{margin:22px 0 8px;}
+  .readout{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-size:14px;
+    color:var(--ink-soft);
+    margin-bottom:10px;
+  }
+  .readout b{
+    font-size:20px;
+    color:var(--ink);
+    font-weight:700;
+  }
+  .track-wrap{
+    position:relative;
+    height:46px;
+    display:flex;
+    align-items:center;
+  }
+  .track{
+    position:absolute;
+    left:0; right:0;
+    height:8px;
+    border-radius:5px;
+    background:var(--track);
+    top:50%; transform:translateY(-50%);
+  }
+  .fill{
+    position:absolute;
+    height:8px;
+    border-radius:5px;
+    background:var(--teal);
+    top:50%; transform:translateY(-50%);
+    opacity:0.5;
+  }
+  input[type=range]{
+    position:absolute;
+    left:0; width:100%;
+    -webkit-appearance:none;
+    appearance:none;
+    background:transparent;
+    pointer-events:none;
+    margin:0;
+    height:46px;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    pointer-events:auto;
+    width:26px; height:26px;
+    border-radius:50%;
+    background:#fff;
+    border:3px solid var(--teal);
+    cursor:pointer;
+    box-shadow:0 2px 6px rgba(0,0,0,0.18);
+    margin-top:0;
+  }
+  input[type=range]::-moz-range-thumb{
+    pointer-events:auto;
+    width:26px; height:26px;
+    border-radius:50%;
+    background:#fff;
+    border:3px solid var(--teal);
+    cursor:pointer;
+    box-shadow:0 2px 6px rgba(0,0,0,0.18);
+  }
+  input[type=range]::-webkit-slider-runnable-track{background:transparent;}
+  input[type=range]::-moz-range-track{background:transparent;}
+  .pin{
+    position:absolute;
+    top:-2px;
+    width:2px;
+    height:50px;
+    background:var(--amber);
+    display:none;
+  }
+  .pin::after{
+    content:attr(data-label);
+    position:absolute;
+    top:-26px;
+    left:50%;
+    transform:translateX(-50%);
+    background:var(--amber);
+    color:#fff;
+    font-size:11px;
+    font-weight:700;
+    padding:2px 7px;
+    border-radius:6px;
+    white-space:nowrap;
+  }
+  .check-btn{
+    display:block;
+    width:100%;
+    margin-top:20px;
+    padding:13px 18px;
+    background:var(--ink);
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background 0.15s;
+  }
+  .check-btn:hover{background:#0f6e56;}
+  .check-btn:disabled{background:var(--track);color:var(--ink-soft);cursor:default;}
+  .reveal{
+    display:none;
+    margin-top:18px;
+    padding:16px 18px;
+    background:var(--amber-light);
+    border-left:4px solid var(--amber);
+    border-radius:0 10px 10px 0;
+    font-size:14px;
+  }
+  .reveal.show{display:block;}
+  .reveal .answer{
+    font-weight:700;
+    color:#8a5b00;
+    margin-bottom:6px;
+    font-size:15px;
+  }
+  .note{
+    display:block;
+    margin-top:10px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    font-style:italic;
+  }
+  .two-col{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  @media (max-width:480px){
+    .two-col{grid-template-columns:1fr;}
+  }
+  .mini-stat{
+    background:var(--teal-light);
+    border-radius:10px;
+    padding:12px 14px;
+    text-align:center;
+  }
+  .mini-stat .n{
+    font-size:20px;
+    font-weight:700;
+    color:var(--teal);
+    display:block;
+  }
+  .mini-stat .l{
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+  footer{
+    max-width:640px;
+    margin:10px auto 0;
+    padding:0 16px;
+    font-size:13px;
+    color:var(--ink-soft);
+    text-align:center;
+  }
+  .help-box{
+    background:var(--red-light);
+    border-radius:var(--radius);
+    padding:18px 20px;
+    margin-bottom:22px;
+    text-align:center;
+  }
+  .help-box b{
+    color:var(--red);
+    font-size:17px;
+  }
+  .sources{
+    margin-top:24px;
+    font-size:11.5px;
+    opacity:0.7;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Kybergrooming a sextortion: odhadni čísla</h1>
+  <p>Než uvidíš skutečná data, zkus si nejdřív sám/sama tipnout. Odhad ti pomůže si lépe zapamatovat, jak to ve skutečnosti je – a možná tě i překvapí, jak moc se tvůj odhad liší od reality.</p>
+</header>
+
+<div class="wrap">
+
+  <div class="intro">
+    Kybergrooming je manipulace dítěte online, jejímž cílem je získat intimní materiál nebo přimět dítě k osobnímu setkání. V posledních letech k tomu přibyla i <strong>sextortion</strong> (vydírání pomocí intimních fotek) a nově i podvody s pomocí <strong>umělé inteligence</strong>. U každé otázky nejdřív nastav posuvník na svůj odhad a pak klikni na <strong>Zkontroluj tip</strong>.
+  </div>
+
+  <!-- OTAZKA 1: VEK PACHATELU (dual range) -->
+  <div class="card">
+    <span class="q-tag">Otázka 1 / 4</span>
+    <h2>Jak staří bývají pachatelé kybergroomingu?</h2>
+    <p class="sub">Nastav dolní a horní hranici věku, ve kterém se podle tebe pachatelé nejčastěji pohybují.</p>
+
+    <div class="slider-block">
+      <div class="readout">
+        <span>Tvůj odhad:</span>
+        <b><span id="age-lo-out">20</span>–<span id="age-hi-out">50</span> let</b>
+      </div>
+      <div class="track-wrap" id="age-track-wrap">
+        <div class="track"></div>
+        <div class="fill" id="age-fill"></div>
+        <div class="pin" id="age-pin"></div>
+        <input type="range" id="age-lo" min="10" max="80" value="20" step="1">
+        <input type="range" id="age-hi" min="10" max="80" value="50" step="1">
+      </div>
+    </div>
+
+    <button class="check-btn" onclick="checkAge()">Zkontroluj tip</button>
+    <div class="reveal" id="age-reveal">
+      <div class="answer">Skutečnost: 17–70 let</div>
+      Pachatelé zahrnují prakticky všechny věkové skupiny od 17 do 70 let. Trendem posledních let je ale snižování věku – v ČR je dnes největší skupinou pachatelů mládež a mladí dospělí ve věku <strong>17–23 let</strong>, často se vydávající za vrstevníka oběti.
+      <span class="note">Zdroj: e-bezpeci.cz, Univerzita Palackého Olomouc</span>
+    </div>
+  </div>
+
+  <!-- OTAZKA 2: PROCENTO PEDOFILU -->
+  <div class="card">
+    <span class="q-tag">Otázka 2 / 4</span>
+    <h2>Kolik procent pachatelů má diagnostikovanou pedofilii?</h2>
+    <p class="sub">Hodně lidí si myslí, že kybergroomer = pedofil. Je to tak?</p>
+
+    <div class="slider-block">
+      <div class="readout">
+        <span>Tvůj odhad:</span>
+        <b><span id="pedo-out">50</span> %</b>
+      </div>
+      <div class="track-wrap" id="pedo-track-wrap">
+        <div class="track"></div>
+        <div class="fill" id="pedo-fill"></div>
+        <div class="pin" id="pedo-pin"></div>
+        <input type="range" id="pedo" min="0" max="100" value="50" step="1">
+      </div>
+    </div>
+
+    <button class="check-btn" onclick="checkPedo()">Zkontroluj tip</button>
+    <div class="reveal" id="pedo-reveal">
+      <div class="answer">Skutečnost: max 10 %</div>
+      Většina pachatelů pedofilii nemá – jde spíš o lidi motivované mocí nad obětí, snadnou dostupností dítěte, nebo v případě sextortion hlavně penězi. To ale neznamená, že jsou méně nebezpeční.
+      <span class="note">Zdroj: e-bezpeci.cz</span>
+    </div>
+  </div>
+
+  <!-- OTAZKA 3: CESKY ODHAD SEXTORTION -->
+  <div class="card">
+    <span class="q-tag">Otázka 3 / 4</span>
+    <h2>Kolik dětí v Česku asi řeší sextortion?</h2>
+    <p class="sub">V USA se počty nahlášených případů finanční sextortion mezi lety 2024 a 2025 skoro zdvojnásobily. Zkusíme to přepočítat na velikost Česka (podle poměru počtu obyvatel) a odhadnout, kolik hlášení by to znamenalo u nás – pro rok 2024 a pro rok 2026.</p>
+
+    <div class="two-col">
+      <div>
+        <div class="slider-block">
+          <div class="readout">
+            <span>Odhad 2024:</span>
+            <b><span id="cz24-out">1000</span></b>
+          </div>
+          <div class="track-wrap" id="cz24-track-wrap">
+            <div class="track"></div>
+            <div class="fill" id="cz24-fill"></div>
+            <div class="pin" id="cz24-pin"></div>
+            <input type="range" id="cz24" min="0" max="4000" value="1000" step="50">
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="slider-block">
+          <div class="readout">
+            <span>Odhad 2026:</span>
+            <b><span id="cz26-out">1000</span></b>
+          </div>
+          <div class="track-wrap" id="cz26-track-wrap">
+            <div class="track"></div>
+            <div class="fill" id="cz26-fill"></div>
+            <div class="pin" id="cz26-pin"></div>
+            <input type="range" id="cz26" min="0" max="4000" value="1000" step="50">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="check-btn" onclick="checkCz()">Zkontroluj tip</button>
+    <div class="reveal" id="cz-reveal">
+      <div class="answer">Odhad pro ČR: cca 900 (2024) → cca 2 600 (2026)</div>
+      Tohle není oficiální česká statistika – je to odhad, který vznikl přepočtem amerických čísel podle poměru počtu obyvatel ČR a USA (ČR má asi 3,2 % obyvatel USA) a promítnutím pozorovaného tempa růstu do dalších let. Skutečné číslo v ČR neznáme přesně, protože hodně případů se vůbec nenahlásí – realita může být ještě vyšší.
+      <span class="note">Odhad na základě dat NCMEC (USA), vlastní přepočet – nejde o oficiální český údaj</span>
+    </div>
+  </div>
+
+  <!-- OTAZKA 4: AI NARUST -->
+  <div class="card">
+    <span class="q-tag">Otázka 4 / 4</span>
+    <h2>O kolikrát vzrostly hlášené případy zneužití AI?</h2>
+    <p class="sub">Mezi rokem 2024 a 2025 prudce vzrostl počet hlášení souvisejících s umělou inteligencí (např. falešné nahé fotky – tzv. deepnudes) v americké databázi NCMEC. Kolikrát si myslíš, že se počet hlášení zvýšil?</p>
+
+    <div class="slider-block">
+      <div class="readout">
+        <span>Tvůj odhad:</span>
+        <b>×<span id="ai-out">10</span></b>
+      </div>
+      <div class="track-wrap" id="ai-track-wrap">
+        <div class="track"></div>
+        <div class="fill" id="ai-fill"></div>
+        <div class="pin" id="ai-pin"></div>
+        <input type="range" id="ai" min="1" max="100" value="10" step="1">
+      </div>
+    </div>
+
+    <button class="check-btn" onclick="checkAi()">Zkontroluj tip</button>
+    <div class="reveal" id="ai-reveal">
+      <div class="answer">Skutečnost: přibližně ×64</div>
+      V USA vzrostl počet hlášení s vazbou na AI z 6 835 (první pololetí 2024) na 440 419 (první pololetí 2025). Přepočteno na velikost Česka by to odpovídalo nárůstu z odhadovaných cca 440 na cca 28 600 hlášení za rok. Tenhle nárůst je tak prudký, že už nedává smysl ho dál promítat do budoucna stejným tempem – jde o zcela novou hrozbu, ne o stabilní trend.
+      <div class="two-col" style="margin-top:14px;">
+        <div class="mini-stat"><span class="n">~440</span><span class="l">odhad ČR 2024</span></div>
+        <div class="mini-stat"><span class="n">~28 600</span><span class="l">odhad ČR 2025</span></div>
+      </div>
+      <span class="note">Zdroj: NCMEC (USA), vlastní přepočet na ČR – nejde o oficiální český údaj</span>
+    </div>
+  </div>
+
+  <div class="help-box">
+    Pokud se ti něco podobného děje nebo o někom víš – <b>zavolej na Linku bezpečí: 116 111</b><br>
+    (zdarma, nonstop, pro děti a studenty do 26 let)
+  </div>
+
+</div>
+
+<footer>
+  <div class="sources">
+    Zdroje: e-bezpeci.cz, nebudobet.cz, Univerzita Palackého Olomouc, NCMEC (missingkids.org). České odhady jsou vlastním přepočtem amerických dat podle poměru počtu obyvatel a nejsou oficiální statistikou.
+  </div>
+</footer>
+
+<script>
+function setupSingle(id, min, max, correctVal, correctLabel, fmt){
+  const input = document.getElementById(id);
+  const out = document.getElementById(id+'-out');
+  const fill = document.getElementById(id+'-fill');
+  const pin = document.getElementById(id+'-pin');
+  function render(){
+    const v = parseInt(input.value,10);
+    out.textContent = fmt ? fmt(v) : v;
+    const pct = (v-min)/(max-min)*100;
+    fill.style.left = '0%';
+    fill.style.width = pct+'%';
+  }
+  input.addEventListener('input', render);
+  render();
+  return function reveal(){
+    const pct = (correctVal-min)/(max-min)*100;
+    pin.style.left = 'calc(' + pct + '% - 1px)';
+    pin.style.display = 'block';
+    pin.setAttribute('data-label', correctLabel);
+  };
+}
+
+function setupDual(loId, hiId, min, max){
+  const lo = document.getElementById(loId);
+  const hi = document.getElementById(hiId);
+  const loOut = document.getElementById(loId+'-out');
+  const hiOut = document.getElementById(hiId+'-out');
+  const fill = document.getElementById('age-fill');
+  function render(){
+    let l = parseInt(lo.value,10);
+    let h = parseInt(hi.value,10);
+    if(l > h){ const t=l; l=h; h=t; }
+    loOut.textContent = l;
+    hiOut.textContent = h;
+    const pctL = (l-min)/(max-min)*100;
+    const pctH = (h-min)/(max-min)*100;
+    fill.style.left = pctL+'%';
+    fill.style.width = (pctH-pctL)+'%';
+  }
+  lo.addEventListener('input', render);
+  hi.addEventListener('input', render);
+  render();
+}
+
+setupDual('age-lo','age-hi',10,80);
+const revealAge = function(){
+  const pin = document.getElementById('age-pin');
+  const min=10, max=80;
+  const pctLo = (17-min)/(max-min)*100;
+  pin.style.left = 'calc(' + pctLo + '% - 1px)';
+  pin.style.display='block';
+  pin.setAttribute('data-label','17–70');
+};
+
+const revealPedo = setupSingle('pedo',0,100,10,'10 %',v=>v+'');
+const revealCz24 = setupSingle('cz24',0,4000,900,'~900',v=>v.toLocaleString('cs-CZ'));
+const revealCz26 = setupSingle('cz26',0,4000,2600,'~2 600',v=>v.toLocaleString('cs-CZ'));
+const revealAi = setupSingle('ai',1,100,64,'×64',v=>v+'');
+
+function checkAge(){
+  revealAge();
+  document.getElementById('age-reveal').classList.add('show');
+}
+function checkPedo(){
+  revealPedo();
+  document.getElementById('pedo-reveal').classList.add('show');
+}
+function checkCz(){
+  revealCz24();
+  revealCz26();
+  document.getElementById('cz-reveal').classList.add('show');
+}
+function checkAi(){
+  revealAi();
+  document.getElementById('ai-reveal').classList.add('show');
+}
+</script>
+
+</body>
+</html>
