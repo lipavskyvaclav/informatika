@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poznej manipulativní techniky kybergroomingu</title>
+<style>
+  :root{
+    --ink:#1c2b2a;
+    --ink-soft:#425856;
+    --bg:#f4f2ec;
+    --card:#ffffff;
+    --teal:#0f6e56;
+    --teal-light:#d9ede7;
+    --amber:#c98500;
+    --amber-light:#faedd2;
+    --red:#a32d2d;
+    --red-light:#f7dede;
+    --green:#1d7a4c;
+    --green-light:#dcf0e3;
+    --track:#e3e0d4;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{overscroll-behavior:contain;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+    line-height:1.55;
+    padding:0 0 60px;
+  }
+  header{
+    background:var(--teal);
+    color:#fff;
+    padding:36px 20px 44px;
+    text-align:center;
+  }
+  header h1{
+    margin:0 0 10px;
+    font-size:clamp(22px,5vw,32px);
+    font-weight:700;
+    letter-spacing:-0.02em;
+  }
+  header p{
+    margin:0;
+    max-width:600px;
+    margin-inline:auto;
+    font-size:15px;
+    opacity:0.92;
+  }
+  .wrap{
+    max-width:720px;
+    margin:-24px auto 0;
+    padding:0 16px;
+  }
+  .intro{
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:22px 22px 24px;
+    box-shadow:0 4px 18px rgba(0,0,0,0.06);
+    margin-bottom:22px;
+    font-size:15px;
+  }
+  .intro strong{color:var(--teal);}
+  .tray-card{
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:20px 20px 22px;
+    box-shadow:0 4px 18px rgba(0,0,0,0.06);
+    margin-bottom:22px;
+  }
+  .tray-card h2{
+    margin:0 0 4px;
+    font-size:16px;
+    font-weight:700;
+  }
+  .tray-card .sub{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin:0 0 16px;
+  }
+  #tray{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    min-height:60px;
+    padding:8px;
+    border-radius:12px;
+    background:var(--bg);
+    border:1.5px dashed var(--track);
+  }
+  .chip{
+    background:var(--teal);
+    color:#fff;
+    padding:10px 14px;
+    border-radius:10px;
+    font-size:13.5px;
+    font-weight:500;
+    cursor:grab;
+    user-select:none;
+    touch-action:none;
+    box-shadow:0 2px 6px rgba(0,0,0,0.12);
+    max-width:260px;
+    line-height:1.4;
+  }
+  .chip.dragging{
+    position:fixed;
+    z-index:999;
+    opacity:0.95;
+    cursor:grabbing;
+    box-shadow:0 8px 20px rgba(0,0,0,0.25);
+    pointer-events:none;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    margin-bottom:20px;
+  }
+  @media (max-width:560px){
+    .grid{grid-template-columns:1fr;}
+  }
+  .zone-card{
+    background:var(--card);
+    border-radius:14px;
+    padding:14px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.05);
+  }
+  .zone-label{
+    font-size:13px;
+    font-weight:700;
+    color:var(--teal);
+    margin-bottom:8px;
+    display:block;
+  }
+  .dropzone{
+    min-height:56px;
+    border-radius:10px;
+    border:1.5px dashed var(--track);
+    background:var(--bg);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:6px;
+    transition:background 0.15s, border-color 0.15s;
+  }
+  .dropzone.hover{
+    border-color:var(--teal);
+    background:var(--teal-light);
+  }
+  .dropzone.empty::before{
+    content:"přetáhni sem";
+    font-size:12px;
+    color:var(--ink-soft);
+    font-style:italic;
+  }
+  .dropzone.correct{
+    border-color:var(--green);
+    background:var(--green-light);
+  }
+  .dropzone.incorrect{
+    border-color:var(--red);
+    background:var(--red-light);
+  }
+  .actions{
+    display:flex;
+    gap:12px;
+    margin-bottom:10px;
+  }
+  .btn{
+    flex:1;
+    padding:13px 18px;
+    border:none;
+    border-radius:10px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background 0.15s;
+  }
+  .btn-primary{background:var(--ink); color:#fff;}
+  .btn-primary:hover{background:var(--teal);}
+  .btn-secondary{background:var(--card); color:var(--ink); border:1.5px solid var(--track);}
+  .btn-secondary:hover{background:var(--bg);}
+  .result{
+    text-align:center;
+    font-size:14px;
+    color:var(--ink-soft);
+    min-height:20px;
+    margin-bottom:10px;
+  }
+  .help-box{
+    background:var(--red-light);
+    border-radius:var(--radius);
+    padding:18px 20px;
+    margin-top:22px;
+    text-align:center;
+  }
+  .help-box b{color:var(--red); font-size:17px;}
+  footer{
+    max-width:720px;
+    margin:16px auto 0;
+    padding:0 16px;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    opacity:0.7;
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Poznej manipulativní techniky</h1>
+  <p>Predátoři, kteří se snaží dítě zmanipulovat online, používají poměrně předvídatelnou "kuchařku" – sadu triků, kterými si oběť postupně omotají kolem prstu. Přetáhni každou větu do kolonky, která podle tebe odpovídá použité technice.</p>
+</header>
+
+<div class="wrap">
+
+  <div class="intro">
+    Níže je osm ukázkových vět, které by mohl napsat online predátor. Každá věta patří k jiné manipulativní technice. <strong>Přetáhni každou větu</strong> (na počítači myší, na mobilu prstem) do správné kolonky a pak klikni na <strong>Zkontroluj</strong>.
+  </div>
+
+  <div class="tray-card">
+    <h2>Věty k roztřídění</h2>
+    <p class="sub">Přetáhni odsud do kolonek níže.</p>
+    <div id="tray"></div>
+  </div>
+
+  <div class="grid" id="zones"></div>
+
+  <div class="actions">
+    <button class="btn btn-primary" onclick="checkAnswers()">Zkontroluj</button>
+    <button class="btn btn-secondary" onclick="resetGame()">Zamíchat znovu</button>
+  </div>
+  <div class="result" id="result"></div>
+
+  <div class="help-box">
+    Pokud si všimneš podobného chování v komunikaci u sebe nebo kamaráda/kamarádky – <b>zavolej na Linku bezpečí: 116 111</b><br>
+    (zdarma, nonstop, pro děti a studenty do 26 let)
+  </div>
+
+</div>
+
+<footer>
+  Zdroje: e-bezpeci.cz, Univerzita Palackého Olomouc (Kopecký, Szotkowski). Ukázkové věty jsou smyšlené a slouží pouze k procvičení rozpoznávání manipulativních vzorců.
+</footer>
+
+<script>
+const categories = [
+  { id:'c1', label:'Soucit a hřejivá slova', sentence:'Naprosto tě chápu, naši byli v tomhle věku taky strašně toxic. Kdybys potřebovala vypnout a jen tak si postěžovat, klidně kdykoliv napiš, jsem tu.' },
+  { id:'c2', label:'Nebezpečné rady', sentence:'Zbytečně to hrotíš, normálně jim řekni, že přespíš u kámošky a hoď si mobil do letadla. Nenech se jima takhle dusit, vždyť to tak dělá každej.' },
+  { id:'c3', label:'Lichocení a podlézání', sentence:'Ty tvoje nový fotky na Insta jsou úplný úlet, fakt ti to tam neskutečně sluší. Upřímně, seš suverénně nejhezčí a nejzajímavější ze všech, co mám v přátelích, máš prostě mega styl.' },
+  { id:'c4', label:'Tlak na tajnosti', sentence:'Hele, doufám, že to naše psaní nescreenuješ někde kámoškám, aby ses pochlubila. Nejsem žádná tvoje hračka nebo flex. Chci ti fakt věřit, tak ať to zůstane jen mezi náma, jo?' },
+  { id:'c5', label:'Nabádání ke smazání stop', sentence:'Btw zapni si u mě vanish mode (mizení zpráv), člověk nikdy neví, kdy ti rodiče vlezou do mobilu a dělali by akorát drama.' },
+  { id:'c6', label:'Řeči o silném citovém poutu', sentence:'Normálně se takhle neotevírám, ale tys mi úplně zamotala hlavu. Je to úlet, ale fakt k tobě začínám něco cítit, záleží mi na tobě mnohem víc než jenom jako na kámošce.' },
+  { id:'c7', label:'Zavádění řeči na intimní témata', sentence:'Jako v tvým věku už lidi docela normálně experimentujou, ne? Jak to máš ty, už si někdy s někým něco měla? Zkoušelas někdy něco s holkama ze školy?' },
+  { id:'c8', label:'Žádost o intimní fotku/video', sentence:'Neuděláš mi dneska radost? Pošli nějaký snap, kde ti to bude fakt slušet, třeba jen ve spodním prádle. Slibuju, že neudělám screen, jen pro mě.' }
+];
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+const tray = document.getElementById('tray');
+const zonesWrap = document.getElementById('zones');
+
+function buildZones(){
+  zonesWrap.innerHTML = '';
+  categories.forEach(cat=>{
+    const card = document.createElement('div');
+    card.className = 'zone-card';
+    card.innerHTML = `<span class="zone-label">${cat.label}</span><div class="dropzone empty" data-id="${cat.id}"></div>`;
+    zonesWrap.appendChild(card);
+  });
+}
+
+function buildChips(){
+  tray.innerHTML = '';
+  const shuffled = shuffle(categories);
+  shuffled.forEach(cat=>{
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.dataset.correct = cat.id;
+    chip.textContent = cat.sentence;
+    tray.appendChild(chip);
+    attachDrag(chip);
+  });
+}
+
+function updateZoneEmptyState(zone){
+  if(zone.children.length === 0){ zone.classList.add('empty'); }
+  else{ zone.classList.remove('empty'); }
+}
+
+function attachDrag(chip){
+  chip.addEventListener('pointerdown', onPointerDown);
+}
+
+let dragEl = null, offX=0, offY=0;
+
+function onPointerDown(e){
+  dragEl = e.currentTarget;
+  const rect = dragEl.getBoundingClientRect();
+  offX = e.clientX - rect.left;
+  offY = e.clientY - rect.top;
+  dragEl.style.width = rect.width+'px';
+  document.body.appendChild(dragEl);
+  dragEl.classList.add('dragging');
+  dragEl.style.left = rect.left+'px';
+  dragEl.style.top = rect.top+'px';
+  dragEl.setPointerCapture(e.pointerId);
+  dragEl.addEventListener('pointermove', onPointerMove);
+  dragEl.addEventListener('pointerup', onPointerUp);
+}
+
+function onPointerMove(e){
+  if(!dragEl) return;
+  dragEl.style.left = (e.clientX - offX)+'px';
+  dragEl.style.top = (e.clientY - offY)+'px';
+  document.querySelectorAll('.dropzone,#tray').forEach(z=>z.classList.remove('hover'));
+  dragEl.style.display='none';
+  const under = document.elementFromPoint(e.clientX, e.clientY);
+  dragEl.style.display='';
+  const zone = under ? under.closest('.dropzone, #tray') : null;
+  if(zone) zone.classList.add('hover');
+}
+
+function onPointerUp(e){
+  if(!dragEl) return;
+  dragEl.classList.remove('dragging');
+  dragEl.style.width='';
+  document.querySelectorAll('.dropzone,#tray').forEach(z=>z.classList.remove('hover'));
+
+  dragEl.style.display='none';
+  const under = document.elementFromPoint(e.clientX, e.clientY);
+  dragEl.style.display='';
+  let zone = under ? under.closest('.dropzone, #tray') : null;
+
+  dragEl.style.position='';
+  dragEl.style.left='';
+  dragEl.style.top='';
+  dragEl.classList.remove('correct','incorrect');
+  const parentZone = dragEl.parentElement;
+
+  if(zone){
+    if(zone.id === 'tray'){
+      zone.appendChild(dragEl);
+    } else {
+      const existing = zone.querySelector('.chip');
+      if(existing && existing !== dragEl){
+        tray.appendChild(existing);
+      }
+      zone.appendChild(dragEl);
+    }
+  } else {
+    tray.appendChild(dragEl);
+  }
+
+  document.querySelectorAll('.dropzone').forEach(updateZoneEmptyState);
+
+  dragEl.removeEventListener('pointermove', onPointerMove);
+  dragEl.removeEventListener('pointerup', onPointerUp);
+  dragEl = null;
+}
+
+function checkAnswers(){
+  let correctCount = 0;
+  document.querySelectorAll('.dropzone').forEach(zone=>{
+    zone.classList.remove('correct','incorrect');
+    const chip = zone.querySelector('.chip');
+    if(chip){
+      if(chip.dataset.correct === zone.dataset.id){
+        zone.classList.add('correct');
+        correctCount++;
+      } else {
+        zone.classList.add('incorrect');
+      }
+    }
+  });
+  const result = document.getElementById('result');
+  if(correctCount === categories.length){
+    result.textContent = 'Výborně! Všech ' + correctCount + ' z ' + categories.length + ' je správně.';
+    result.style.color = 'var(--green)';
+  } else {
+    result.textContent = 'Správně: ' + correctCount + ' z ' + categories.length + '. Zkus přesunout ty červené znovu.';
+    result.style.color = 'var(--red)';
+  }
+}
+
+function resetGame(){
+  buildZones();
+  buildChips();
+  document.getElementById('result').textContent = '';
+}
+
+buildZones();
+buildChips();
+</script>
+
+</body>
+</html>
