@@ -284,7 +284,7 @@
 
   <!-- OTAZKA 1: VEK PACHATELU (dual range) -->
   <div class="card">
-    <span class="q-tag">Otázka 1 / 4</span>
+    <span class="q-tag">Otázka 1 / 5</span>
     <h2>Jak staří bývají pachatelé kybergroomingu?</h2>
     <p class="sub">Nastav dolní a horní hranici věku, ve kterém se podle tebe pachatelé nejčastěji pohybují.</p>
 
@@ -312,7 +312,7 @@
 
   <!-- OTAZKA 2: PROCENTO PEDOFILU -->
   <div class="card">
-    <span class="q-tag">Otázka 2 / 4</span>
+    <span class="q-tag">Otázka 2 / 5</span>
     <h2>Kolik procent pachatelů má diagnostikovanou pedofilii?</h2>
     <p class="sub">Hodně lidí si myslí, že kybergroomer = pedofil. Je to tak?</p>
 
@@ -339,7 +339,7 @@
 
   <!-- OTAZKA 3: CESKY ODHAD SEXTORTION -->
   <div class="card">
-    <span class="q-tag">Otázka 3 / 4</span>
+    <span class="q-tag">Otázka 3 / 5</span>
     <h2>Kolik dětí v Česku asi řeší sextortion?</h2>
     <p class="sub">V USA se počty nahlášených případů finanční sextortion mezi lety 2024 a 2025 skoro zdvojnásobily. Zkusíme to přepočítat na velikost Česka (podle poměru počtu obyvatel) a odhadnout, kolik hlášení by to znamenalo u nás – pro rok 2024 a pro rok 2026.</p>
 
@@ -384,7 +384,7 @@
 
   <!-- OTAZKA 4: AI NARUST -->
   <div class="card">
-    <span class="q-tag">Otázka 4 / 4</span>
+    <span class="q-tag">Otázka 4 / 5</span>
     <h2>O kolikrát vzrostly hlášené případy zneužití AI?</h2>
     <p class="sub">Mezi rokem 2024 a 2025 prudce vzrostl počet hlášení souvisejících s umělou inteligencí (např. falešné nahé fotky – tzv. deepnudes) v americké databázi NCMEC. Kolikrát si myslíš, že se počet hlášení zvýšil?</p>
 
@@ -410,6 +410,33 @@
         <div class="mini-stat"><span class="n">~28 600</span><span class="l">odhad ČR 2025</span></div>
       </div>
       <span class="note">Zdroj: NCMEC (USA), vlastní přepočet na ČR – nejde o oficiální český údaj</span>
+    </div>
+  </div>
+
+  <!-- OTAZKA 5: ZNA OBET PACHATELE -->
+  <div class="card">
+    <span class="q-tag">Otázka 5 / 5</span>
+    <h2>Kolik procent obětí zná svého útočníka i z reálného života?</h2>
+    <p class="sub">Většina lidí si představuje pachatele jako úplně cizího člověka, se kterým se dítě seznámí až na internetu. Je to tak?</p>
+
+    <div class="slider-block">
+      <div class="readout">
+        <span>Tvůj odhad:</span>
+        <b><span id="know-out">50</span> %</b>
+      </div>
+      <div class="track-wrap" id="know-track-wrap">
+        <div class="track"></div>
+        <div class="fill" id="know-fill"></div>
+        <div class="pin" id="know-pin"></div>
+        <input type="range" id="know" min="0" max="100" value="50" step="1">
+      </div>
+    </div>
+
+    <button class="check-btn" onclick="checkKnow()">Zkontroluj tip</button>
+    <div class="reveal" id="know-reveal">
+      <div class="answer">Skutečnost: cca 90 %</div>
+      Naprostá většina obětí svého útočníka zná i mimo internet – vůbec nemusí jít jen o cizího člověka s falešným profilem. Často jde o kombinaci s kyberšikanou mezi spolužáky, nebo o osobu, se kterou se dítě běžně setkává: trenéra, učitele, souseda, rodinného známého. Právě proto, že tyto lidi dítě zná a důvěřuje jim, je pro ně těžší si všimnout, že se něco děje, a ještě těžší to někomu říct.
+      <span class="note">Zdroj: RAINN, CDC (obecná statistika sexuálního zneužívání dětí)</span>
     </div>
   </div>
 
@@ -485,6 +512,7 @@ const revealPedo = setupSingle('pedo',0,100,10,'10 %',v=>v+'');
 const revealCz24 = setupSingle('cz24',0,4000,900,'~900',v=>v.toLocaleString('cs-CZ'));
 const revealCz26 = setupSingle('cz26',0,4000,2600,'~2 600',v=>v.toLocaleString('cs-CZ'));
 const revealAi = setupSingle('ai',1,100,64,'×64',v=>v+'');
+const revealKnow = setupSingle('know',0,100,90,'90 %',v=>v+'');
 
 function checkAge(){
   revealAge();
@@ -502,6 +530,10 @@ function checkCz(){
 function checkAi(){
   revealAi();
   document.getElementById('ai-reveal').classList.add('show');
+}
+function checkKnow(){
+  revealKnow();
+  document.getElementById('know-reveal').classList.add('show');
 }
 </script>
 
