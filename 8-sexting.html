@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Právní detektiv: Sexting</title>
+<style>
+  :root {
+    --bg: #f8f9fa;
+    --text: #2b2d42;
+    --text-light: #6c757d;
+    --card-bg: #ffffff;
+    --primary: #1d3557;
+    --cat1: #e63946; /* Trestný čin */
+    --cat2: #f4a261; /* Rizikové */
+    --cat3: #457b9d; /* Přestupek */
+    --success: #2a9d8f;
+    --error: #d62828;
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+  
+  body {
+    margin: 0; padding: 20px 10px; background: var(--bg); color: var(--text);
+    display: flex; justify-content: center; min-height: 100vh;
+  }
+
+  .container {
+    max-width: 650px; width: 100%; background: var(--card-bg);
+    border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    overflow: hidden; display: flex; flex-direction: column;
+  }
+
+  /* Hlavička */
+  header { background: var(--primary); color: white; padding: 24px; text-align: center; }
+  header h1 { margin: 0 0 8px 0; font-size: 26px; }
+  header p { margin: 0; opacity: 0.9; font-size: 15px; }
+
+  .content { padding: 30px; flex-grow: 1; }
+
+  /* Úvodní obrazovka */
+  .intro-box { background: #f1faee; padding: 20px; border-radius: 12px; margin-bottom: 24px; border-left: 5px solid var(--primary); }
+  .category-list { display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px; }
+  .cat-item { padding: 15px; border-radius: 12px; color: white; }
+  .cat-item h3 { margin: 0 0 5px 0; font-size: 18px; display: flex; align-items: center; gap: 8px;}
+  .cat-item p { margin: 0; font-size: 14px; opacity: 0.95; }
+  .bg-cat1 { background: var(--cat1); }
+  .bg-cat2 { background: var(--cat2); }
+  .bg-cat3 { background: var(--cat3); }
+
+  /* Kvízová obrazovka */
+  .progress { font-size: 13px; color: var(--text-light); text-align: center; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;}
+  .scenario-card { background: var(--bg); padding: 25px; border-radius: 12px; font-size: 18px; line-height: 1.5; margin-bottom: 25px; border: 1px solid #e9ecef; font-weight: 500; text-align: center;}
+  
+  .options { display: flex; flex-direction: column; gap: 12px; }
+  .btn-option {
+    padding: 16px; border: 2px solid transparent; border-radius: 12px;
+    font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    background: white; display: flex; align-items: center; gap: 12px;
+  }
+  .btn-option:hover { filter: brightness(0.95); }
+  
+  .btn-cat1 { border-color: var(--cat1); color: var(--cat1); }
+  .btn-cat1:hover, .btn-cat1.selected { background: var(--cat1); color: white; }
+  
+  .btn-cat2 { border-color: var(--cat2); color: var(--cat2); }
+  .btn-cat2:hover, .btn-cat2.selected { background: var(--cat2); color: white; }
+  
+  .btn-cat3 { border-color: var(--cat3); color: var(--cat3); }
+  .btn-cat3:hover, .btn-cat3.selected { background: var(--cat3); color: white; }
+
+  .btn-option:disabled { cursor: not-allowed; opacity: 0.5; }
+  .btn-option.selected { opacity: 1; transform: scale(1.02); }
+
+  /* Odhalení (Feedback) */
+  .feedback { margin-top: 25px; border-radius: 12px; overflow: hidden; display: none; animation: fadeIn 0.4s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  
+  .feedback-header { padding: 15px; font-weight: bold; color: white; display: flex; align-items: center; gap: 10px;}
+  .feedback-header.correct { background: var(--success); }
+  .feedback-header.incorrect { background: var(--error); }
+  .feedback-body { padding: 20px; background: #f8f9fa; border: 1px solid #e9ecef; border-top: none; font-size: 15px; line-height: 1.6;}
+  .feedback-body strong { color: var(--primary); }
+
+  /* Ovládací tlačítka */
+  .btn-main {
+    background: var(--primary); color: white; border: none; padding: 16px 24px;
+    border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer;
+    width: 100%; transition: background 0.2s; margin-top: 20px;
+  }
+  .btn-main:hover { background: #152740; }
+
+  .hidden { display: none !important; }
+
+  /* Konec */
+  .end-screen { text-align: center; padding: 20px 0; }
+  .score-circle { width: 120px; height: 120px; border-radius: 50%; background: var(--success); color: white; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: bold; margin: 0 auto 20px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>⚖️ Právní detektiv</h1>
+    <p>Ne všechno na internetu je jen nevinná sranda.</p>
+  </header>
+
+  <!-- ÚVODNÍ OBRAZOVKA -->
+  <div id="screen-intro" class="content">
+    <div class="intro-box">
+      <strong>Tvůj úkol:</strong> Přečti si postupně 8 situací z reálného života a rozhodni, do jaké právní kategorie spadají. Zařaď je do jedné z těchto tří škatulek:
+    </div>
+
+    <div class="category-list">
+      <div class="cat-item bg-cat1">
+        <h3>🚨 Trestný čin</h3>
+        <p>Extrémně vážné porušení zákona. Jde o kriminální jednání. Řeší to kriminálka, případně sociálka a u starších 15 let hrozí soudy a reálné tresty.</p>
+      </div>
+      <div class="cat-item bg-cat2">
+        <h3>⚠️ Rizikové, ale legální</h3>
+        <p>Zákon to přímo nezakazuje, do vězení za to nepůjdeš. Je to ale obrovský hazard a zaděláváš si na budoucí problém, až ztratíš nad situací kontrolu.</p>
+      </div>
+      <div class="cat-item bg-cat3">
+        <h3>⛔ Přestupek / Porušení práv</h3>
+        <p>Není to sice na vězení, ale porušuješ cizí hranice. Řeší to obvykle škola (ředitelská důtka), přestupková komise nebo smazání profilu.</p>
+      </div>
+    </div>
+
+    <button class="btn-main" onclick="startQuiz()">Rozumím, jdeme na to!</button>
+  </div>
+
+  <!-- KVÍZOVÁ OBRAZOVKA -->
+  <div id="screen-quiz" class="content hidden">
+    <div class="progress" id="progress-text">Situace 1 z 8</div>
+    
+    <div class="scenario-card" id="scenario-text">
+      <!-- Text situace se načte přes JS -->
+    </div>
+
+    <div class="options" id="options-container">
+      <button class="btn-option btn-cat1" onclick="checkAnswer('cat1', this)">🚨 Trestný čin</button>
+      <button class="btn-option btn-cat2" onclick="checkAnswer('cat2', this)">⚠️ Rizikové, legální</button>
+      <button class="btn-option btn-cat3" onclick="checkAnswer('cat3', this)">⛔ Přestupek / Porušení práv</button>
+    </div>
+
+    <div class="feedback" id="feedback-box">
+      <div class="feedback-header" id="feedback-header"></div>
+      <div class="feedback-body">
+        <strong>Detektivní odhalení:</strong><br>
+        <span id="feedback-text"></span>
+      </div>
+      <button class="btn-main" onclick="nextQuestion()" id="btn-next">Další situace</button>
+    </div>
+  </div>
+
+  <!-- ZÁVĚREČNÁ OBRAZOVKA -->
+  <div id="screen-end" class="content hidden end-screen">
+    <h2>Vyšetřování ukončeno!</h2>
+    <div class="score-circle" id="final-score">0/8</div>
+    <p>Pamatuj si: V online světě platí stejné zákony jako na ulici. Ztráta kontroly nad fotkou trvá vteřinu, ale napravit to může trvat roky.</p>
+    <button class="btn-main" onclick="location.reload()">Zkusit znovu znova</button>
+  </div>
+</div>
+
+<script>
+const scenarios = [
+  {
+    text: "Kuba dostal od kamaráda intimní fotku holky z vedlejší třídy. Aby ukázal, že je frajer, přeposlal ji rovnou do whatsappové skupiny fotbalového týmu.",
+    correct: "cat1",
+    explanation: "Tohle je největší past! Kuba si myslí, že je to jen „sranda“, ale podle zákona se právě dopustil šíření dětské pornografie. Tím, že fotku bez souhlasu přeposlal dál, je z něj spolupachatel trestného činu, i když tu fotku sám nevyfotil."
+  },
+  {
+    text: "Patnáctiletá Nela pošle svému klukovi, se kterým už rok chodí, na Snapchat fotku ve spodním prádle. Udělala to sama od sebe a nenutil ji k tomu.",
+    correct: "cat2",
+    explanation: "Vyfotit vlastní tělo a dobrovolně to někomu poslat není trestný čin. Problém je, že Nela právě navždy ztratila nad fotkou kontrolu. Jakmile se s klukem rozejdou nebo jemu někdo ukradne mobil, tahle „legální“ fotka zničí Nele pověst."
+  },
+  {
+    text: "Tobiáš píše postupně několika holkám ze třídy do zpráv, ať mu pošlou fotku svého zadku. Když ho odmítnou, nadává jim a nepřestává dál otravovat.",
+    correct: "cat3",
+    explanation: "Neustálé žadonění o fotky a následné nadávky po odmítnutí jsou typickým sexuálním obtěžováním a kyberšikanou. Sice za to Tobiáš nepůjde do vězení, ale případ určitě skončí v ředitelně s rodiči a klidně i na policii jako přestupek proti občanskému soužití."
+  },
+  {
+    text: "Aneta se zakouká do kluka ze školy. Vytvoří si falešný Insta profil s cizími hezčími fotkami. Napíše mu, pošle cizí ukradené nudes a nutí ho, ať jí na oplátku pošle svoje intimní fotky.",
+    correct: "cat1",
+    explanation: "Tohle je hned několik zločinů najednou! Vydávání se za někoho jiného a lákání intimních materiálů pod falešnou identitou je čistokrevný kybergrooming (příprava k výrobě dětské pornografie). Navíc samotné posílání cizích ukradených nudes je šíření pornografie."
+  },
+  {
+    text: "Verča na svůj veřejný TikTok natočí virální taneček. Má na sobě úmyslně odhalené oblečení (krátký top), aby získala co nejvíc zhlédnutí od spolužáků.",
+    correct: "cat2",
+    explanation: "Je to tvoje tělo a tvůj profil, takže zákon přímo neporušuješ. Algoritmus ale nepozná tvůj úmysl. Začne video organicky nabízet tisícům cizích lidí, včetně online predátorů, kteří si video nenápadně uloží do svých soukromých sbírek."
+  },
+  {
+    text: "Marek dostal od holky nudes. Sice si dává pozor a nikomu fotku nepřeposílá, ale o přestávce vezme svůj mobil a fotku postupně ukáže na displeji pěti kámošům ze třídy.",
+    correct: "cat1",
+    explanation: "Překvapení! Zákon netrestá jen „elektronické odeslání“, ale jakékoliv „zpřístupnění“. Tím, že Marek cizí intimní fotku ukazuje ostatním, i když na svém vlastním displeji, dopouští se šíření dětské pornografie úplně stejně, jako kdyby ji poslal."
+  },
+  {
+    text: "Čtrnáctileté Emě pípne na Instagramu zpráva od cizího profilu. Když ji otevře, je tam nevyžádaná fotka cizího přirození (tzv. dickpic).",
+    correct: "cat1",
+    explanation: "Tohle se jmenuje kyberflashing. Je to úplně stejné, jako kdyby se někdo před Emou obnažoval v parku. Odesílatel se dopouští výtržnictví a šíření pornografie. Rozhodně nesmazat! Ema by měla udělat screen profilu a říct to dospělému."
+  },
+  {
+    text: "Kluk píše oběti: ‚Buď mi hned pošleš ještě jedno video bez podprsenky, nebo tu tvoji fotku, co už mám, pošlu tvému tátovi a všem spolužákům ze třídy.‘",
+    correct: "cat1",
+    explanation: "Tohle je učebnicová definice vydírání (sextortion). Útočník se dopouští mimořádně těžkého zločinu. Tady platí pro oběť jediné pravidlo: zablokovat, nahlásit a nikdy neposlat další fotku! Vyděrač se totiž nikdy nespokojí s málem."
+  }
+];
+
+let currentIdx = 0;
+let score = 0;
+
+const screenIntro = document.getElementById('screen-intro');
+const screenQuiz = document.getElementById('screen-quiz');
+const screenEnd = document.getElementById('screen-end');
+const progressText = document.getElementById('progress-text');
+const scenarioText = document.getElementById('scenario-text');
+const feedbackBox = document.getElementById('feedback-box');
+const feedbackHeader = document.getElementById('feedback-header');
+const feedbackText = document.getElementById('feedback-text');
+const optionsContainer = document.getElementById('options-container');
+
+function startQuiz() {
+  screenIntro.classList.add('hidden');
+  screenQuiz.classList.remove('hidden');
+  loadScenario();
+}
+
+function loadScenario() {
+  feedbackBox.style.display = 'none';
+  const buttons = optionsContainer.querySelectorAll('button');
+  buttons.forEach(btn => {
+    btn.disabled = false;
+    btn.classList.remove('selected');
+  });
+  
+  progressText.textContent = `Situace ${currentIdx + 1} z ${scenarios.length}`;
+  scenarioText.textContent = `„${scenarios[currentIdx].text}“`;
+}
+
+function checkAnswer(selectedCat, btnElement) {
+  const currentScenario = scenarios[currentIdx];
+  const buttons = optionsContainer.querySelectorAll('button');
+  
+  buttons.forEach(btn => btn.disabled = true);
+  btnElement.classList.add('selected');
+
+  feedbackBox.style.display = 'block';
+  feedbackText.textContent = currentScenario.explanation;
+
+  if (selectedCat === currentScenario.correct) {
+    feedbackHeader.className = 'feedback-header correct';
+    feedbackHeader.innerHTML = '✅ Správně rozklíčováno!';
+    score++;
+  } else {
+    feedbackHeader.className = 'feedback-header incorrect';
+    feedbackHeader.innerHTML = '❌ Pozor, omyl! Tady ses, detektive, spletl.';
+  }
+  
+  if (currentIdx === scenarios.length - 1) {
+    document.getElementById('btn-next').textContent = 'Zobrazit výsledky';
+  }
+}
+
+function nextQuestion() {
+  currentIdx++;
+  if (currentIdx < scenarios.length) {
+    loadScenario();
+  } else {
+    screenQuiz.classList.add('hidden');
+    screenEnd.classList.remove('hidden');
+    document.getElementById('final-score').textContent = `${score}/${scenarios.length}`;
+  }
+}
+</script>
+
+</body>
+</html>
